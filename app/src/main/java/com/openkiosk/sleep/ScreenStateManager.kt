@@ -1,17 +1,12 @@
 package com.openkiosk.sleep
 
 import android.app.Activity
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
-import android.content.Context
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.PowerManager
 import android.view.WindowManager
 import com.openkiosk.domain.model.ScreenState
-import com.openkiosk.receiver.KioskDeviceAdminReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,22 +25,8 @@ class ScreenStateManager @Inject constructor(
     private var activityRef: WeakReference<Activity>? = null
 
     private var activeTimeoutMs: Long = 30_000L
-    private var dimTimeoutMs: Long = 10_000L
+    private var dimTimeoutMs: Long = 60_000L
     private var dimBrightness: Float = 0.1f
-
-    private val powerManager: PowerManager =
-        context.getSystemService(Context.POWER_SERVICE) as PowerManager
-
-    private val devicePolicyManager: DevicePolicyManager =
-        context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-
-    private val adminComponent = ComponentName(context, KioskDeviceAdminReceiver::class.java)
-
-    @Suppress("DEPRECATION")
-    private var wakeLock: PowerManager.WakeLock = powerManager.newWakeLock(
-        PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-        "openkiosk:wake"
-    )
 
     private val dimRunnable = Runnable { transitionToDim() }
     private val sleepRunnable = Runnable { transitionToSleep() }
@@ -53,11 +34,13 @@ class ScreenStateManager @Inject constructor(
     fun configure(activeTimeoutMs: Long, dimTimeoutMs: Long, dimBrightness: Float) {
         this.activeTimeoutMs = activeTimeoutMs
         this.dimTimeoutMs = dimTimeoutMs
-        this.dimBrightness = dimBrightness.coerceIn(0.0f, 1.0f)
+        this.dimBrightness = dimBrightness.coerceIn(0.01f, 1.0f)
     }
 
     fun attachActivity(activity: Activity) {
         activityRef = WeakReference(activity)
+        // Ensure screen stays on at OS level — always
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     fun detachActivity() {
@@ -68,7 +51,9 @@ class ScreenStateManager @Inject constructor(
         handler.removeCallbacks(dimRunnable)
         handler.removeCallbacks(sleepRunnable)
 
-        transitionToActive()
+        if (_screenState.value != ScreenState.ACTIVE) {
+            transitionToActive()
+        }
 
         handler.postDelayed(dimRunnable, activeTimeoutMs)
     }
@@ -78,20 +63,12 @@ class ScreenStateManager @Inject constructor(
 
         activity.runOnUiThread {
             val window = activity.window
-
-            val layoutParams = window.attributes
-            layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-            window.attributes = layoutParams
-
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                activity.setTurnScreenOn(true)
+            // Restore system brightness
+            window.attributes = window.attributes.apply {
+                screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             }
-        }
-
-        if (!wakeLock.isHeld) {
-            wakeLock.acquire(10 * 60 * 1000L) // 10-minute safety timeout
+            // Ensure FLAG_KEEP_SCREEN_ON is always set
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
 
         _screenState.value = ScreenState.ACTIVE
@@ -100,12 +77,13 @@ class ScreenStateManager @Inject constructor(
     private fun transitionToDim() {
         val activity = activityRef?.get() ?: return
 
-        releaseWakeLock()
-
         activity.runOnUiThread {
-            val layoutParams = activity.window.attributes
-            layoutParams.screenBrightness = dimBrightness
-            activity.window.attributes = layoutParams
+            val window = activity.window
+            // Reduce brightness but keep screen on
+            window.attributes = window.attributes.apply {
+                screenBrightness = dimBrightness
+            }
+            // FLAG_KEEP_SCREEN_ON stays — never remove it
         }
 
         _screenState.value = ScreenState.DIM
@@ -114,31 +92,18 @@ class ScreenStateManager @Inject constructor(
     }
 
     private fun transitionToSleep() {
-        releaseWakeLock()
+        val activity = activityRef?.get() ?: return
 
-        val isDeviceOwner = devicePolicyManager.isDeviceOwnerApp(context.packageName)
-
-        if (isDeviceOwner) {
-            devicePolicyManager.lockNow()
-        } else {
-            val activity = activityRef?.get()
-            if (activity != null) {
-                activity.runOnUiThread {
-                    val window = activity.window
-                    val layoutParams = window.attributes
-                    layoutParams.screenBrightness = 0.0f
-                    window.attributes = layoutParams
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                }
+        activity.runOnUiThread {
+            val window = activity.window
+            // Brightness to minimum — simulates screen off
+            // The black overlay in KioskScreen ensures fully black display
+            window.attributes = window.attributes.apply {
+                screenBrightness = 0.0f
             }
+            // FLAG_KEEP_SCREEN_ON stays — Activity must remain alive for sensors
         }
 
         _screenState.value = ScreenState.SLEEP
-    }
-
-    private fun releaseWakeLock() {
-        if (wakeLock.isHeld) {
-            wakeLock.release()
-        }
     }
 }

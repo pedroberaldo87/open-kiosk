@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,10 +45,7 @@ class KioskViewModel @Inject constructor(
 
     val currentPlaylistItem: StateFlow<PlaylistItem?> = playlistManager.currentItem
 
-    val currentUrl: StateFlow<String> get() {
-        // Derived: playlist item URL, or startUrl from config
-        return _currentUrl.asStateFlow()
-    }
+    val currentUrl: StateFlow<String> get() = _currentUrl.asStateFlow()
     private val _currentUrl = MutableStateFlow("")
 
     private val _isOnline = MutableStateFlow(true)
@@ -60,6 +58,8 @@ class KioskViewModel @Inject constructor(
 
     private var connectivityCallback: ConnectivityManager.NetworkCallback? = null
     private var connectivityManager: ConnectivityManager? = null
+    private var lifecycleOwnerRef: WeakReference<LifecycleOwner>? = null
+    private var cameraPermissionGranted = false
 
     init {
         playlistManager.start(viewModelScope)
@@ -88,15 +88,14 @@ class KioskViewModel @Inject constructor(
             screenState.collect { state ->
                 when (state) {
                     ScreenState.ACTIVE -> {
-                        // In active state, camera motion detection is unnecessary
-                        // (screen is already on). Keep sensors off to save battery.
+                        // Screen is on — no need for wake sensors
                         motionDetectionManager.stop()
                         sensorWakeManager.stop()
                     }
                     ScreenState.DIM, ScreenState.SLEEP -> {
-                        // Start sensors to detect user presence and wake up
+                        // Screen dimmed/off — start all wake sensors
                         val cfg = config.value
-                        startSensorsIfNeeded(cfg)
+                        startWakeSensors(cfg)
                     }
                 }
             }
@@ -108,6 +107,7 @@ class KioskViewModel @Inject constructor(
     }
 
     fun attachActivity(activity: Activity, lifecycleOwner: LifecycleOwner) {
+        lifecycleOwnerRef = WeakReference(lifecycleOwner)
         screenStateManager.attachActivity(activity)
 
         // Start kiosk lock
@@ -131,6 +131,7 @@ class KioskViewModel @Inject constructor(
     }
 
     fun detachActivity() {
+        lifecycleOwnerRef = null
         screenStateManager.detachActivity()
         motionDetectionManager.stop()
         sensorWakeManager.stop()
@@ -152,24 +153,37 @@ class KioskViewModel @Inject constructor(
         recoveryManager.onSuccess()
     }
 
-    fun startMotionDetection(lifecycleOwner: LifecycleOwner) {
-        val cfg = config.value
-        if (cfg.wakeOnMotion && !motionDetectionManager.isRunning) {
-            motionDetectionManager.start(
-                lifecycleOwner = lifecycleOwner,
-                pollingIntervalMs = cfg.cameraPollingIntervalSeconds * 1000L,
-                threshold = cfg.motionSensitivity.threshold,
-                onMotion = { onUserInteraction() }
-            )
+    fun onCameraPermissionGranted() {
+        cameraPermissionGranted = true
+        // If we're already in DIM/SLEEP, start camera immediately
+        val state = screenState.value
+        if (state == ScreenState.DIM || state == ScreenState.SLEEP) {
+            startCameraIfNeeded(config.value)
         }
     }
 
-    private fun startSensorsIfNeeded(cfg: KioskConfig) {
+    private fun startWakeSensors(cfg: KioskConfig) {
+        // Start proximity + shake sensors
         if (cfg.wakeOnProximity || cfg.wakeOnShake) {
             sensorWakeManager.start(
                 wakeOnProximity = cfg.wakeOnProximity,
                 wakeOnShake = cfg.wakeOnShake,
                 onWake = { onUserInteraction() }
+            )
+        }
+        // Start camera motion detection
+        startCameraIfNeeded(cfg)
+    }
+
+    private fun startCameraIfNeeded(cfg: KioskConfig) {
+        if (!cfg.wakeOnMotion || !cameraPermissionGranted) return
+        val owner = lifecycleOwnerRef?.get() ?: return
+        if (!motionDetectionManager.isRunning) {
+            motionDetectionManager.start(
+                lifecycleOwner = owner,
+                pollingIntervalMs = cfg.cameraPollingIntervalSeconds * 1000L,
+                threshold = cfg.motionSensitivity.threshold,
+                onMotion = { onUserInteraction() }
             )
         }
     }

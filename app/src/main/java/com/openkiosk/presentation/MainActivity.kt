@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
-            viewModel.startMotionDetection(this)
+            viewModel.onCameraPermissionGranted()
         }
     }
 
@@ -48,8 +48,9 @@ class MainActivity : ComponentActivity() {
         viewModel.detachActivity()
     }
 
+    @Suppress("DEPRECATION", "MissingSuperCall")
     override fun onBackPressed() {
-        // Block back button in kiosk mode
+        // Intentionally not calling super — blocks back button in kiosk mode
     }
 
     private fun requestCameraIfNeeded() {
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             == PackageManager.PERMISSION_GRANTED
         ) {
-            viewModel.startMotionDetection(this)
+            viewModel.onCameraPermissionGranted()
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }

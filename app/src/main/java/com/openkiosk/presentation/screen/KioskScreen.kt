@@ -1,5 +1,8 @@
 package com.openkiosk.presentation.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerValue
@@ -15,7 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.openkiosk.domain.model.ScreenState
 import com.openkiosk.presentation.component.KioskWebView
 import com.openkiosk.presentation.component.OfflineScreen
 import com.openkiosk.presentation.component.PinDialog
@@ -29,6 +34,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
     val isOnline by viewModel.isOnline.collectAsState()
     val needsRefresh by viewModel.needsRefresh.collectAsState()
     val config by viewModel.config.collectAsState()
+    val screenState by viewModel.screenState.collectAsState()
 
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
@@ -54,7 +60,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = !showPinDialog,
+        gesturesEnabled = !showPinDialog && screenState == ScreenState.ACTIVE,
         drawerContent = {
             SettingsDrawerContent(
                 viewModel = settingsViewModel,
@@ -63,6 +69,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // WebView layer — always rendered (keeps content alive)
             if (!isOnline && currentUrl.isBlank()) {
                 OfflineScreen()
             } else {
@@ -77,13 +84,28 @@ fun KioskScreen(viewModel: KioskViewModel) {
                     )
                 }
             }
+
+            // Black overlay — covers everything when SLEEP
+            // Touch on overlay wakes the screen
+            if (screenState == ScreenState.SLEEP) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            viewModel.onUserInteraction()
+                        }
+                )
+            }
         }
     }
 
     // PIN dialog gate: intercept drawer open gesture
     LaunchedEffect(drawerState.isOpen) {
         if (drawerState.isOpen && !pinVerified) {
-            // Drawer opened by gesture without PIN — close and ask for PIN
             drawerState.close()
             showPinDialog = true
         }
