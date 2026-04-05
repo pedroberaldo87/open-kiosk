@@ -9,7 +9,7 @@ private const val TAG = "MotionDetection"
 private const val PIXEL_THRESHOLD = 15 // individual pixel change threshold (was 30, lowered for low-light)
 
 class MotionDetectionAnalyzer(
-    private val pollingIntervalMs: Long = 5000L,
+    @Volatile private var pollingIntervalMs: Long = 5000L,
     @Volatile private var motionThreshold: Double = 0.05,
     private val onMotionDetected: () -> Unit
 ) : ImageAnalysis.Analyzer {
@@ -72,5 +72,9 @@ class MotionDetectionAnalyzer(
 
     fun updateThreshold(threshold: Double) {
         motionThreshold = threshold
+    }
+
+    fun updatePollingInterval(intervalMs: Long) {
+        pollingIntervalMs = intervalMs
     }
 }

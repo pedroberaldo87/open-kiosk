@@ -85,9 +85,9 @@ fun KioskScreen(viewModel: KioskViewModel) {
                 }
             }
 
-            // Black overlay — covers everything when SLEEP
+            // Black overlay — covers everything when SLEEP or DEEP_SLEEP
             // Touch on overlay wakes the screen
-            if (screenState == ScreenState.SLEEP) {
+            if (screenState == ScreenState.SLEEP || screenState == ScreenState.DEEP_SLEEP) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

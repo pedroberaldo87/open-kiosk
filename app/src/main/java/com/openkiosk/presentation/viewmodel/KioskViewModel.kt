@@ -71,7 +71,10 @@ class KioskViewModel @Inject constructor(
                 screenStateManager.configure(
                     activeTimeoutMs = cfg.activeTimeoutSeconds * 1000L,
                     dimTimeoutMs = cfg.dimTimeoutSeconds * 1000L,
-                    dimBrightness = cfg.dimBrightnessPercent / 100f
+                    dimBrightness = cfg.dimBrightnessPercent / 100f,
+                    deepSleepEnabled = cfg.deepSleepEnabled,
+                    deepSleepStartHour = cfg.deepSleepStartHour,
+                    deepSleepEndHour = cfg.deepSleepEndHour
                 )
                 recoveryManager.autoRefreshIntervalMs = cfg.autoRefreshMinutes * 60 * 1000L
             }
@@ -88,16 +91,28 @@ class KioskViewModel @Inject constructor(
         viewModelScope.launch {
             screenState.collect { state ->
                 Log.d(TAG, "Screen state changed: $state")
+                val cfg = config.value
                 when (state) {
                     ScreenState.ACTIVE -> {
                         Log.d(TAG, "ACTIVE — stopping sensors")
                         motionDetectionManager.stop()
                         sensorWakeManager.stop()
                     }
-                    ScreenState.DIM, ScreenState.SLEEP -> {
-                        Log.d(TAG, "$state — starting wake sensors")
-                        val cfg = config.value
+                    ScreenState.DIM -> {
+                        Log.d(TAG, "DIM — starting wake sensors (continuous camera)")
                         startWakeSensors(cfg)
+                        motionDetectionManager.disablePulsedMode()
+                    }
+                    ScreenState.SLEEP -> {
+                        Log.d(TAG, "SLEEP — starting wake sensors (pulsed camera)")
+                        startWakeSensors(cfg)
+                        val pulseIntervalMs = cfg.cameraPulseIntervalSeconds * 1000L
+                        motionDetectionManager.enablePulsedMode(pulseIntervalMs)
+                    }
+                    ScreenState.DEEP_SLEEP -> {
+                        Log.d(TAG, "DEEP_SLEEP — stopping all sensors (touch-only wake)")
+                        motionDetectionManager.stop()
+                        sensorWakeManager.stop()
                     }
                 }
             }

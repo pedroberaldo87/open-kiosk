@@ -12,6 +12,12 @@ data class KioskConfig(
     val wakeOnShake: Boolean = true,
     val motionSensitivity: MotionSensitivity = MotionSensitivity.MEDIUM,
     val cameraPollingIntervalSeconds: Int = 5,
+    val cameraPulseIntervalSeconds: Int = 10,
+
+    // Deep Sleep — scheduled time range, touch-only wake, all sensors off
+    val deepSleepEnabled: Boolean = false,
+    val deepSleepStartHour: Int = 22,
+    val deepSleepEndHour: Int = 6,
 
     // WebView
     val autoRefreshMinutes: Int = 30,
