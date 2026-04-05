@@ -1,5 +1,7 @@
 package com.openkiosk.presentation.screen
 
+import android.app.Activity
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +52,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.openkiosk.BuildConfig
+import com.openkiosk.R
 import com.openkiosk.domain.model.MotionSensitivity
 import com.openkiosk.domain.model.PlaylistItem
 import com.openkiosk.presentation.viewmodel.SettingsViewModel
@@ -76,7 +82,7 @@ fun SettingsDrawerContent(
             // PLAYLIST Section
             SectionHeader(
                 icon = { Icon(Icons.Default.Refresh, contentDescription = null) },
-                title = "PLAYLIST"
+                title = stringResource(R.string.section_playlist)
             )
             Spacer(modifier = Modifier.height(8.dp))
             PlaylistSection(viewModel, playlist)
@@ -86,7 +92,7 @@ fun SettingsDrawerContent(
             // AUTO-REFRESH Section
             SectionHeader(
                 icon = { Icon(Icons.Default.Refresh, contentDescription = null) },
-                title = "AUTO-REFRESH"
+                title = stringResource(R.string.section_auto_refresh)
             )
             Spacer(modifier = Modifier.height(8.dp))
             AutoRefreshSection(config.autoRefreshMinutes) { value ->
@@ -98,7 +104,7 @@ fun SettingsDrawerContent(
             // SLEEP & WAKE Section
             SectionHeader(
                 icon = { Icon(Icons.Default.Close, contentDescription = null) },
-                title = "SLEEP & WAKE"
+                title = stringResource(R.string.section_sleep_wake)
             )
             Spacer(modifier = Modifier.height(8.dp))
             SleepWakeSection(
@@ -110,6 +116,10 @@ fun SettingsDrawerContent(
                 wakeOnShake = config.wakeOnShake,
                 motionSensitivity = config.motionSensitivity,
                 cameraPolling = config.cameraPollingIntervalSeconds,
+                deepSleepEnabled = config.deepSleepEnabled,
+                deepSleepStartHour = config.deepSleepStartHour,
+                deepSleepEndHour = config.deepSleepEndHour,
+                cameraPulseInterval = config.cameraPulseIntervalSeconds,
                 onUpdate = { key, value -> viewModel.updateConfig(key, value) }
             )
 
@@ -118,7 +128,7 @@ fun SettingsDrawerContent(
             // KIOSK Section
             SectionHeader(
                 icon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                title = "KIOSK"
+                title = stringResource(R.string.section_kiosk)
             )
             Spacer(modifier = Modifier.height(8.dp))
             KioskSection(
@@ -130,15 +140,25 @@ fun SettingsDrawerContent(
 
             SectionDivider()
 
+            // LANGUAGE Section
+            SectionHeader(
+                icon = { Icon(Icons.Default.Info, contentDescription = null) },
+                title = stringResource(R.string.section_language)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LanguageSection()
+
+            SectionDivider()
+
             // SOBRE Section
             SectionHeader(
                 icon = { Icon(Icons.Default.Info, contentDescription = null) },
-                title = "SOBRE"
+                title = stringResource(R.string.section_about)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Open Kiosk v1.0.0", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.about_version, BuildConfig.VERSION_NAME), style = MaterialTheme.typography.bodyMedium)
             Text(
-                "github.com/pedroberaldo87/OPEN-KIOSK",
+                stringResource(R.string.about_github),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -152,7 +172,7 @@ fun SettingsDrawerContent(
             ) {
                 Icon(Icons.Default.Close, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Fechar")
+                Text(stringResource(R.string.action_close))
             }
         }
     }
@@ -218,7 +238,7 @@ private fun PlaylistSection(
                 IconButton(onClick = { viewModel.removePlaylistItem(item) }) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Remover",
+                        contentDescription = stringResource(R.string.action_remove),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -239,12 +259,12 @@ private fun DurationDropdown(
     var expanded by remember { mutableStateOf(false) }
     Box {
         TextButton(onClick = { expanded = true }) {
-            Text("${selected}s")
+            Text(stringResource(R.string.suffix_seconds, selected))
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { duration ->
                 DropdownMenuItem(
-                    text = { Text("${duration}s") },
+                    text = { Text(stringResource(R.string.suffix_seconds, duration)) },
                     onClick = {
                         onSelect(duration)
                         expanded = false
@@ -268,7 +288,7 @@ private fun AddUrlRow(onAdd: (String, Int) -> Unit) {
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text("URL") },
+                label = { Text(stringResource(R.string.label_url)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 modifier = Modifier.weight(1f)
@@ -283,14 +303,14 @@ private fun AddUrlRow(onAdd: (String, Int) -> Unit) {
                     }
                 }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add))
             }
         }
     } else {
         OutlinedButton(onClick = { showInput = true }, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Adicionar URL")
+            Text(stringResource(R.string.action_add_url))
         }
     }
 }
@@ -298,24 +318,20 @@ private fun AddUrlRow(onAdd: (String, Int) -> Unit) {
 @Composable
 private fun AutoRefreshSection(currentMinutes: Int, onUpdate: (Int) -> Unit) {
     val options = listOf(0, 5, 10, 15, 30, 60)
-    val labels = mapOf(
-        0 to "Desativado",
-        5 to "5 min",
-        10 to "10 min",
-        15 to "15 min",
-        30 to "30 min",
-        60 to "60 min"
-    )
+    val disabledLabel = stringResource(R.string.auto_refresh_disabled)
     var expanded by remember { mutableStateOf(false) }
+
+    fun formatLabel(minutes: Int): String =
+        if (minutes == 0) disabledLabel else "$minutes min"
 
     Box {
         OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
-            Text(labels[currentMinutes] ?: "$currentMinutes min")
+            Text(formatLabel(currentMinutes))
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { minutes ->
                 DropdownMenuItem(
-                    text = { Text(labels[minutes] ?: "$minutes min") },
+                    text = { Text(formatLabel(minutes)) },
                     onClick = {
                         onUpdate(minutes)
                         expanded = false
@@ -336,9 +352,13 @@ private fun SleepWakeSection(
     wakeOnShake: Boolean,
     motionSensitivity: MotionSensitivity,
     cameraPolling: Int,
+    deepSleepEnabled: Boolean,
+    deepSleepStartHour: Int,
+    deepSleepEndHour: Int,
+    cameraPulseInterval: Int,
     onUpdate: (String, String) -> Unit
 ) {
-    Text("Ativo → DIM: ${activeTimeout}s", style = MaterialTheme.typography.bodySmall)
+    Text(stringResource(R.string.label_active_to_dim, activeTimeout), style = MaterialTheme.typography.bodySmall)
     Slider(
         value = activeTimeout.toFloat(),
         onValueChange = { onUpdate("activeTimeoutSeconds", it.toInt().toString()) },
@@ -346,7 +366,7 @@ private fun SleepWakeSection(
         modifier = Modifier.fillMaxWidth()
     )
 
-    Text("DIM → Sleep: ${dimTimeout}s", style = MaterialTheme.typography.bodySmall)
+    Text(stringResource(R.string.label_dim_to_sleep, dimTimeout), style = MaterialTheme.typography.bodySmall)
     Slider(
         value = dimTimeout.toFloat(),
         onValueChange = { onUpdate("dimTimeoutSeconds", it.toInt().toString()) },
@@ -354,7 +374,7 @@ private fun SleepWakeSection(
         modifier = Modifier.fillMaxWidth()
     )
 
-    Text("Brilho DIM: ${dimBrightness}%", style = MaterialTheme.typography.bodySmall)
+    Text(stringResource(R.string.label_dim_brightness, dimBrightness), style = MaterialTheme.typography.bodySmall)
     Slider(
         value = dimBrightness.toFloat(),
         onValueChange = { onUpdate("dimBrightnessPercent", it.toInt().toString()) },
@@ -364,45 +384,92 @@ private fun SleepWakeSection(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    SwitchRow("Acordar por câmera", wakeOnMotion) {
+    SwitchRow(stringResource(R.string.switch_wake_camera), wakeOnMotion) {
         onUpdate("wakeOnMotion", it.toString())
     }
-    SwitchRow("Acordar por proximidade", wakeOnProximity) {
+    SwitchRow(stringResource(R.string.switch_wake_proximity), wakeOnProximity) {
         onUpdate("wakeOnProximity", it.toString())
     }
-    SwitchRow("Acordar por movimento", wakeOnShake) {
+    SwitchRow(stringResource(R.string.switch_wake_shake), wakeOnShake) {
         onUpdate("wakeOnShake", it.toString())
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
     val sensitivityLabels = mapOf(
-        MotionSensitivity.LOW to "Baixa",
-        MotionSensitivity.MEDIUM to "Média",
-        MotionSensitivity.HIGH to "Alta"
+        MotionSensitivity.LOW to stringResource(R.string.sensitivity_low),
+        MotionSensitivity.MEDIUM to stringResource(R.string.sensitivity_medium),
+        MotionSensitivity.HIGH to stringResource(R.string.sensitivity_high)
     )
+    val sensitivityEntries = MotionSensitivity.entries
     DropdownRow(
-        label = "Sensibilidade da câmera",
-        selected = sensitivityLabels[motionSensitivity] ?: "Média",
-        options = MotionSensitivity.entries.map { sensitivityLabels[it]!! },
+        label = stringResource(R.string.label_camera_sensitivity),
+        selected = sensitivityLabels[motionSensitivity] ?: sensitivityLabels[MotionSensitivity.MEDIUM]!!,
+        options = sensitivityEntries.map { sensitivityLabels[it]!! },
         onSelect = { label ->
-            val sensitivity = sensitivityLabels.entries.first { it.value == label }.key
-            onUpdate("motionSensitivity", sensitivity.name)
+            val index = sensitivityEntries.map { sensitivityLabels[it]!! }.indexOf(label)
+            if (index >= 0) onUpdate("motionSensitivity", sensitivityEntries[index].name)
         }
     )
 
     Spacer(modifier = Modifier.height(4.dp))
 
     val pollingOptions = listOf(1, 2, 3, 5, 10)
+    val pollingLabels = pollingOptions.map { stringResource(R.string.suffix_seconds, it) }
     DropdownRow(
-        label = "Polling câmera",
-        selected = "${cameraPolling}s",
-        options = pollingOptions.map { "${it}s" },
+        label = stringResource(R.string.label_camera_polling),
+        selected = stringResource(R.string.suffix_seconds, cameraPolling),
+        options = pollingLabels,
         onSelect = { label ->
-            val seconds = label.removeSuffix("s").toInt()
-            onUpdate("cameraPollingIntervalSeconds", seconds.toString())
+            val index = pollingLabels.indexOf(label)
+            if (index >= 0) onUpdate("cameraPollingIntervalSeconds", pollingOptions[index].toString())
         }
     )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    val pulseOptions = listOf(5, 10, 15, 20, 30, 60)
+    val pulseLabels = pulseOptions.map { stringResource(R.string.suffix_seconds, it) }
+    DropdownRow(
+        label = stringResource(R.string.label_camera_pulse),
+        selected = stringResource(R.string.suffix_seconds, cameraPulseInterval),
+        options = pulseLabels,
+        onSelect = { label ->
+            val index = pulseLabels.indexOf(label)
+            if (index >= 0) onUpdate("cameraPulseIntervalSeconds", pulseOptions[index].toString())
+        }
+    )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    SwitchRow(stringResource(R.string.switch_deep_sleep), deepSleepEnabled) {
+        onUpdate("deepSleepEnabled", it.toString())
+    }
+
+    if (deepSleepEnabled) {
+        val hours = (0..23).toList()
+        fun formatHour(h: Int): String = "%02d:00".format(h)
+
+        DropdownRow(
+            label = stringResource(R.string.label_deep_sleep_start),
+            selected = formatHour(deepSleepStartHour),
+            options = hours.map { formatHour(it) },
+            onSelect = { label ->
+                val hour = label.substringBefore(":").toInt()
+                onUpdate("deepSleepStartHour", hour.toString())
+            }
+        )
+
+        DropdownRow(
+            label = stringResource(R.string.label_deep_sleep_end),
+            selected = formatHour(deepSleepEndHour),
+            options = hours.map { formatHour(it) },
+            onSelect = { label ->
+                val hour = label.substringBefore(":").toInt()
+                onUpdate("deepSleepEndHour", hour.toString())
+            }
+        )
+    }
 }
 
 @Composable
@@ -455,19 +522,48 @@ private fun DropdownRow(
 }
 
 @Composable
+private fun LanguageSection() {
+    val context = LocalContext.current
+    val prefs = context.getSharedPreferences("open_kiosk_prefs", Context.MODE_PRIVATE)
+    val currentLang = prefs.getString("language", "auto") ?: "auto"
+
+    val languages = listOf(
+        "auto" to stringResource(R.string.language_auto),
+        "en" to "English",
+        "pt" to "Português",
+        "es" to "Español"
+    )
+
+    val currentLabel = languages.firstOrNull { it.first == currentLang }?.second
+        ?: languages[0].second
+
+    DropdownRow(
+        label = stringResource(R.string.label_language),
+        selected = currentLabel,
+        options = languages.map { it.second },
+        onSelect = { label ->
+            val langCode = languages.firstOrNull { it.second == label }?.first ?: "auto"
+            prefs.edit().putString("language", langCode).apply()
+            // Recreate activity to apply new locale
+            (context as? Activity)?.recreate()
+        }
+    )
+}
+
+@Composable
 private fun KioskSection(
     lockTaskEnabled: Boolean,
     pinEnabled: Boolean,
     pin: String,
     onUpdate: (String, String) -> Unit
 ) {
-    SwitchRow("Lock Task Mode", lockTaskEnabled) {
+    SwitchRow(stringResource(R.string.switch_lock_task), lockTaskEnabled) {
         onUpdate("lockTaskEnabled", it.toString())
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    SwitchRow("Proteção por PIN", pinEnabled) {
+    SwitchRow(stringResource(R.string.switch_pin_protection), pinEnabled) {
         onUpdate("pinEnabled", it.toString())
     }
 
@@ -484,7 +580,7 @@ private fun KioskSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("PIN atual", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.label_current_pin), style = MaterialTheme.typography.bodyMedium)
                 Text(
                     "****",
                     style = MaterialTheme.typography.bodySmall,
@@ -492,7 +588,7 @@ private fun KioskSection(
                 )
             }
             OutlinedButton(onClick = { showPinChange = true }) {
-                Text("Alterar PIN")
+                Text(stringResource(R.string.action_change_pin))
             }
         }
 
@@ -521,7 +617,7 @@ private fun PinChangeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (step == 0) "PIN atual" else "Novo PIN") },
+        title = { Text(if (step == 0) stringResource(R.string.dialog_title_current_pin) else stringResource(R.string.dialog_title_new_pin)) },
         text = {
             Column {
                 OutlinedTextField(
@@ -532,7 +628,7 @@ private fun PinChangeDialog(
                             error = false
                         }
                     },
-                    label = { Text(if (step == 0) "Digite o PIN atual" else "Digite o novo PIN") },
+                    label = { Text(if (step == 0) stringResource(R.string.hint_enter_current_pin) else stringResource(R.string.hint_enter_new_pin)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -541,7 +637,7 @@ private fun PinChangeDialog(
                 )
                 if (error) {
                     Text(
-                        text = "PIN incorreto",
+                        text = stringResource(R.string.error_wrong_pin),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 4.dp)
@@ -566,12 +662,12 @@ private fun PinChangeDialog(
                     }
                 }
             }) {
-                Text("OK")
+                Text(stringResource(R.string.action_ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

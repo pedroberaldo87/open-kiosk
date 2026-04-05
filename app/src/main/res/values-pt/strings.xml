@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Open Kiosk</string>
+
+    <!-- Settings: About -->
+    <string name="about_version">Open Kiosk v%s</string>
+    <string name="about_github">github.com/pedroberaldo87/OPEN-KIOSK</string>
+
+    <!-- Settings: Section headers -->
+    <string name="section_playlist">PLAYLIST</string>
+    <string name="section_auto_refresh">AUTO-REFRESH</string>
+    <string name="section_sleep_wake">SLEEP &amp; WAKE</string>
+    <string name="section_kiosk">KIOSK</string>
+    <string name="section_language">IDIOMA</string>
+    <string name="section_about">SOBRE</string>
+
+    <!-- Settings: Auto-refresh -->
+    <string name="auto_refresh_disabled">Desativado</string>
+    <string name="auto_refresh_minutes">%d min</string>
+
+    <!-- Settings: Sleep & Wake -->
+    <string name="label_active_to_dim">Ativo → DIM: %ds</string>
+    <string name="label_dim_to_sleep">DIM → Sleep: %ds</string>
+    <string name="label_dim_brightness">Brilho DIM: %d%%</string>
+    <string name="switch_wake_camera">Acordar por câmera</string>
+    <string name="switch_wake_proximity">Acordar por proximidade</string>
+    <string name="switch_wake_shake">Acordar por movimento</string>
+    <string name="label_camera_sensitivity">Sensibilidade da câmera</string>
+    <string name="label_camera_polling">Polling câmera</string>
+    <string name="label_camera_pulse">Pulso câmera (sleep)</string>
+    <string name="switch_deep_sleep">Deep sleep (só toque)</string>
+    <string name="label_deep_sleep_start">Início</string>
+    <string name="label_deep_sleep_end">Fim</string>
+
+    <!-- Settings: Sensitivity -->
+    <string name="sensitivity_low">Baixa</string>
+    <string name="sensitivity_medium">Média</string>
+    <string name="sensitivity_high">Alta</string>
+
+    <!-- Settings: Kiosk -->
+    <string name="switch_lock_task">Lock Task Mode</string>
+    <string name="switch_pin_protection">Proteção por PIN</string>
+    <string name="label_current_pin">PIN atual</string>
+    <string name="action_change_pin">Alterar PIN</string>
+
+    <!-- PIN dialogs -->
+    <string name="dialog_title_enter_pin">Digite o PIN</string>
+    <string name="dialog_title_current_pin">PIN atual</string>
+    <string name="dialog_title_new_pin">Novo PIN</string>
+    <string name="hint_enter_current_pin">Digite o PIN atual</string>
+    <string name="hint_enter_new_pin">Digite o novo PIN</string>
+    <string name="label_pin">PIN</string>
+    <string name="error_wrong_pin">PIN incorreto</string>
+
+    <!-- Actions -->
+    <string name="action_close">Fechar</string>
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_add">Adicionar</string>
+    <string name="action_remove">Remover</string>
+    <string name="action_add_url">Adicionar URL</string>
+    <string name="label_url">URL</string>
+    <string name="suffix_seconds">%ds</string>
+
+    <!-- Language -->
+    <string name="label_language">Idioma</string>
+    <string name="language_auto">Auto (sistema)</string>
+
+    <!-- Offline screen -->
+    <string name="offline_no_connection">Sem conexão</string>
+    <string name="offline_waiting">Aguardando conexão…</string>
+</resources>

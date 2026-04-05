@@ -1,7 +1,9 @@
 package com.openkiosk.presentation
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.openkiosk.presentation.screen.KioskScreen
 import com.openkiosk.presentation.viewmodel.KioskViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -24,6 +27,19 @@ class MainActivity : ComponentActivity() {
     ) { granted ->
         if (granted) {
             viewModel.onCameraPermissionGranted()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val prefs = newBase.getSharedPreferences("open_kiosk_prefs", Context.MODE_PRIVATE)
+        val lang = prefs.getString("language", "auto") ?: "auto"
+        if (lang != "auto") {
+            val locale = Locale(lang)
+            val config = Configuration(newBase.resources.configuration)
+            config.setLocale(locale)
+            super.attachBaseContext(newBase.createConfigurationContext(config))
+        } else {
+            super.attachBaseContext(newBase)
         }
     }
 
