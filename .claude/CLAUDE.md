@@ -65,10 +65,14 @@ com.openkiosk/
 - **DevicePolicyManager** — Lock Task Mode requer device owner via ADB (usado só no KioskLockManager)
 - **WebViewRecoveryManager** — retry com exponential backoff (5s→15s→30s→60s)
 
+## Hardware Testado
+- **Amazon Fire HD 8** — câmera frontal funciona, shake funciona, proximity sensor NÃO existe neste device
+
 ## Decisões de Arquitetura
 - Sleep nunca desliga tela no OS (sem lockNow, sem WakeLock) — simula via brightness=0 + overlay preto, como Fully Kiosk
 - FLAG_KEEP_SCREEN_ON sempre ativa — Activity nunca é suspensa pelo OS, sensores continuam rodando
 - Câmera motion detection liga apenas em DIM/SLEEP, desliga em ACTIVE (economia de bateria)
+- Pixel threshold individual = 15 (de 0-255) — baixado de 30 pra funcionar em low-light no Fire HD 8
 - Proximity/shake sensors mesma lógica — ativos só quando precisam acordar a tela
 - PIN desativado por default — primeiro uso sem barreira
 
