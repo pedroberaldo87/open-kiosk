@@ -1,5 +1,9 @@
 # OPEN-KIOSK
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Build](https://github.com/pedroberaldo87/OPEN-KIOSK/actions/workflows/build.yml/badge.svg)](https://github.com/pedroberaldo87/OPEN-KIOSK/actions/workflows/build.yml)
+[![API](https://img.shields.io/badge/API-28%2B-green.svg)](https://developer.android.com/about/versions/pie)
+
 Open-source Android kiosk browser for digital signage. A lightweight alternative to Fully Kiosk Browser.
 
 ## Features
@@ -152,6 +156,16 @@ com.openkiosk/
 adb logcat -s KioskViewModel:D MotionDetection:D SensorWake:D
 ```
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build, test, and submit changes.
+
+Please report security vulnerabilities privately — see [SECURITY.md](SECURITY.md).
+
+## Code of Conduct
+
+This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md).
+
 ## License
 
-Apache License 2.0
+This project is licensed under the [GNU General Public License v3.0](LICENSE).

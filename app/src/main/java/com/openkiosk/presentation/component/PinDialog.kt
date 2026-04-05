@@ -16,9 +16,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.openkiosk.R
 
 @Composable
 fun PinDialog(
@@ -42,7 +44,7 @@ fun PinDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Digite o PIN") },
+        title = { Text(stringResource(R.string.dialog_title_enter_pin)) },
         text = {
             Column {
                 OutlinedTextField(
@@ -53,7 +55,7 @@ fun PinDialog(
                             error = false
                         }
                     },
-                    label = { Text("PIN") },
+                    label = { Text(stringResource(R.string.label_pin)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -62,7 +64,7 @@ fun PinDialog(
                 )
                 if (error) {
                     Text(
-                        text = "PIN incorreto",
+                        text = stringResource(R.string.error_wrong_pin),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 4.dp)
@@ -79,12 +81,12 @@ fun PinDialog(
                     pin = ""
                 }
             }) {
-                Text("OK")
+                Text(stringResource(R.string.action_ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

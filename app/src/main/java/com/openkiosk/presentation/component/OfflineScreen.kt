@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.openkiosk.R
 
 private val DarkBackground = Color(0xFF1A1A1A)
 
@@ -31,13 +33,13 @@ fun OfflineScreen() {
     ) {
         Icon(
             imageVector = Icons.Default.WifiOff,
-            contentDescription = "Sem conexão",
+            contentDescription = stringResource(R.string.offline_no_connection),
             tint = Color.White,
             modifier = Modifier.size(64.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Aguardando conexão...",
+            text = stringResource(R.string.offline_waiting),
             color = Color.White,
             fontSize = 18.sp
         )
