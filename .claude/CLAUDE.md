@@ -38,13 +38,13 @@ com.openkiosk/
 
 ## Banco de Dados
 - **Tipo:** SQLite (Room)
-- **Schema:** `AppDatabase.kt` — entities: `ConfigEntity` (key-value), `PlaylistEntity`
-- **DAOs:** `ConfigDao`, `PlaylistDao`
-- **Repositórios:** `ConfigRepository` (expõe `StateFlow<KioskConfig>`), `PlaylistRepository`
+- **Schema:** **AppDatabase.kt** — entities: ConfigEntity (key-value), PlaylistEntity
+- **DAOs:** ConfigDao, PlaylistDao
+- **Repositórios:** ConfigRepository (expõe StateFlow de KioskConfig), PlaylistRepository
 
 ## Variáveis de Ambiente
 - Não usa .env — configurações persistidas no Room database
-- **Signing config** (release build) via `local.properties`:
+- **Signing config** (release build) via **local.properties**:
   - `signing.storeFile` — path relativo para keystore
   - `signing.storePassword` — senha da keystore
   - `signing.keyAlias` — alias da key
@@ -53,24 +53,34 @@ com.openkiosk/
 ## Padrões do Projeto
 - **Arquitetura:** MVVM — ViewModels orquestram managers, Compose observa StateFlows
 - **DI:** Hilt — @Singleton nos managers, @HiltViewModel nos ViewModels, @AndroidEntryPoint na Activity
-- **Estado reativo:** `StateFlow` em todos os managers (ScreenState, KioskConfig, PlaylistItem)
-- **WebView:** Embutido em Compose via `AndroidView` — crash recovery por key-based recomposition
-- **Configs:** Room key-value (`ConfigEntity`) → `ConfigRepository` → `StateFlow<KioskConfig>`
+- **Estado reativo:** StateFlow em todos os managers (ScreenState, KioskConfig, PlaylistItem)
+- **WebView:** Embutido em Compose via AndroidView — crash recovery por key-based recomposition
+- **Configs:** Room key-value (ConfigEntity) → ConfigRepository → StateFlow de KioskConfig
 - **Sensores:** Managers singleton desacoplados — ligados/desligados conforme ScreenState
+- **Sleep:** Simula tela desligada via brightness=0 + overlay preto (nunca chama lockNow/PowerManager)
+- **PIN:** Ativável/desativável nas settings. Desativado por default. Protege acesso ao drawer de settings
 
 ## Dependências Críticas
-- `CameraX` (ImageAnalysis) — detecção de movimento via Y-plane grayscale diff, sem ML
-- `DevicePolicyManager` — Lock Task Mode requer device owner via ADB
-- `WebViewRecoveryManager` — retry com exponential backoff (5s→15s→30s→60s)
+- **CameraX** (ImageAnalysis) — detecção de movimento via Y-plane grayscale diff, sem ML
+- **DevicePolicyManager** — Lock Task Mode requer device owner via ADB (usado só no KioskLockManager)
+- **WebViewRecoveryManager** — retry com exponential backoff (5s→15s→30s→60s)
+
+## Decisões de Arquitetura
+- Sleep nunca desliga tela no OS (sem lockNow, sem WakeLock) — simula via brightness=0 + overlay preto, como Fully Kiosk
+- FLAG_KEEP_SCREEN_ON sempre ativa — Activity nunca é suspensa pelo OS, sensores continuam rodando
+- Câmera motion detection liga apenas em DIM/SLEEP, desliga em ACTIVE (economia de bateria)
+- Proximity/shake sensors mesma lógica — ativos só quando precisam acordar a tela
+- PIN desativado por default — primeiro uso sem barreira
 
 ## Gotchas
-- **Device Owner** requer `adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver` — device deve estar sem contas configuradas
+- **Device Owner** requer `adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver` — device sem contas
 - **Sem device owner** o app usa immersive sticky mode (usuário pode escapar com swipe)
-- **Câmera no emulador** não funciona pra motion detection — usar device real
-- **HTTP permitido** via `network_security_config.xml` — necessário pra digital signage em redes internas
-- **PIN default** é `0000` — definido em `KioskConfig.kt` como valor padrão
-- **Keystore** em `keystore/open-kiosk.jks` — não commitada no git, senhas em `local.properties`
+- **Câmera no emulador** não funciona pra motion detection — câmera virtual é estática
+- **HTTP permitido** via **network_security_config.xml** — necessário pra digital signage em redes internas
+- **PIN default** é 0000 (definido em KioskConfig), desativado por default (pinEnabled=false)
+- **Keystore** em **keystore/open-kiosk.jks** — não commitada no git, senhas em **local.properties**
 - **Orientação** forçada landscape no manifest
+- **Proximity debounce** inicializa com currentTimeMillis() — evita wake imediato no start
 
 ## Comandos Úteis
 ```bash
@@ -82,6 +92,9 @@ export PATH="$JAVA_HOME/bin:$PATH"
 
 # Build release (requer local.properties com signing config)
 ./gradlew assembleRelease
+
+# Lint
+./gradlew lintDebug
 
 # APK paths
 # Debug:   app/build/outputs/apk/debug/app-debug.apk
@@ -95,6 +108,9 @@ adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver
 
 # Remove device owner
 adb shell dpm remove-active-admin com.openkiosk/.receiver.KioskDeviceAdminReceiver
+
+# Debug logs (sensores e câmera)
+adb logcat -s KioskViewModel:D MotionDetection:D SensorWake:D
 ```
 
 <!-- project-doc:end -->

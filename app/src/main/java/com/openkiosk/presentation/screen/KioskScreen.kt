@@ -103,9 +103,9 @@ fun KioskScreen(viewModel: KioskViewModel) {
         }
     }
 
-    // PIN dialog gate: intercept drawer open gesture
+    // PIN dialog gate: intercept drawer open gesture (only if PIN enabled)
     LaunchedEffect(drawerState.isOpen) {
-        if (drawerState.isOpen && !pinVerified) {
+        if (drawerState.isOpen && config.pinEnabled && !pinVerified) {
             drawerState.close()
             showPinDialog = true
         }

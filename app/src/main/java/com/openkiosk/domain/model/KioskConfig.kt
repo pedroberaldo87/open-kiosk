@@ -18,6 +18,7 @@ data class KioskConfig(
 
     // Kiosk
     val lockTaskEnabled: Boolean = true,
+    val pinEnabled: Boolean = false,
     val pin: String = "0000",
 
     // General

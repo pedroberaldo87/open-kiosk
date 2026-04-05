@@ -18,6 +18,7 @@ import com.openkiosk.sensors.MotionDetectionManager
 import com.openkiosk.sensors.SensorWakeManager
 import com.openkiosk.sleep.ScreenStateManager
 import com.openkiosk.webview.WebViewRecoveryManager
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -86,14 +87,15 @@ class KioskViewModel @Inject constructor(
         // Observe screen state → manage sensors accordingly
         viewModelScope.launch {
             screenState.collect { state ->
+                Log.d(TAG, "Screen state changed: $state")
                 when (state) {
                     ScreenState.ACTIVE -> {
-                        // Screen is on — no need for wake sensors
+                        Log.d(TAG, "ACTIVE — stopping sensors")
                         motionDetectionManager.stop()
                         sensorWakeManager.stop()
                     }
                     ScreenState.DIM, ScreenState.SLEEP -> {
-                        // Screen dimmed/off — start all wake sensors
+                        Log.d(TAG, "$state — starting wake sensors")
                         val cfg = config.value
                         startWakeSensors(cfg)
                     }
@@ -154,8 +156,8 @@ class KioskViewModel @Inject constructor(
     }
 
     fun onCameraPermissionGranted() {
+        Log.d(TAG, "Camera permission granted")
         cameraPermissionGranted = true
-        // If we're already in DIM/SLEEP, start camera immediately
         val state = screenState.value
         if (state == ScreenState.DIM || state == ScreenState.SLEEP) {
             startCameraIfNeeded(config.value)
@@ -176,16 +178,27 @@ class KioskViewModel @Inject constructor(
     }
 
     private fun startCameraIfNeeded(cfg: KioskConfig) {
-        if (!cfg.wakeOnMotion || !cameraPermissionGranted) return
-        val owner = lifecycleOwnerRef?.get() ?: return
+        Log.d(TAG, "startCameraIfNeeded: wakeOnMotion=${cfg.wakeOnMotion}, permissionGranted=$cameraPermissionGranted, isRunning=${motionDetectionManager.isRunning}")
+        if (!cfg.wakeOnMotion) { Log.d(TAG, "Camera skip: wakeOnMotion=false"); return }
+        if (!cameraPermissionGranted) { Log.d(TAG, "Camera skip: permission not granted"); return }
+        val owner = lifecycleOwnerRef?.get()
+        if (owner == null) { Log.d(TAG, "Camera skip: lifecycleOwner is null"); return }
         if (!motionDetectionManager.isRunning) {
+            Log.d(TAG, "Starting camera motion detection (polling=${cfg.cameraPollingIntervalSeconds}s, threshold=${cfg.motionSensitivity})")
             motionDetectionManager.start(
                 lifecycleOwner = owner,
                 pollingIntervalMs = cfg.cameraPollingIntervalSeconds * 1000L,
                 threshold = cfg.motionSensitivity.threshold,
-                onMotion = { onUserInteraction() }
+                onMotion = {
+                    Log.d(TAG, "MOTION DETECTED — waking screen")
+                    onUserInteraction()
+                }
             )
         }
+    }
+
+    companion object {
+        private const val TAG = "KioskViewModel"
     }
 
     private fun startConnectivityMonitoring(activity: Activity) {

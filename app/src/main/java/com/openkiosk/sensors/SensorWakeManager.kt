@@ -5,10 +5,13 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.sqrt
+
+private const val TAG = "SensorWake"
 
 @Singleton
 class SensorWakeManager @Inject constructor(
@@ -23,15 +26,22 @@ class SensorWakeManager @Inject constructor(
     fun start(wakeOnProximity: Boolean, wakeOnShake: Boolean, onWake: () -> Unit) {
         stop()
 
+        // Initialize debounce timestamps to now — prevents immediate trigger on first event
+        val now = System.currentTimeMillis()
+        lastProximityTrigger = now
+        lastShakeTrigger = now
+
         if (wakeOnProximity) {
             val proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
             if (proximitySensor != null) {
                 val maxRange = proximitySensor.maximumRange
+                Log.d(TAG, "Proximity sensor registered (maxRange=$maxRange)")
                 proximityListener = object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent) {
-                        val now = System.currentTimeMillis()
-                        if (event.values[0] < maxRange && now - lastProximityTrigger > 1000L) {
-                            lastProximityTrigger = now
+                        val eventTime = System.currentTimeMillis()
+                        if (event.values[0] < maxRange && eventTime - lastProximityTrigger > 1000L) {
+                            lastProximityTrigger = eventTime
+                            Log.d(TAG, "Proximity wake triggered (value=${event.values[0]}, maxRange=$maxRange)")
                             onWake()
                         }
                     }
@@ -43,12 +53,15 @@ class SensorWakeManager @Inject constructor(
                     proximitySensor,
                     SensorManager.SENSOR_DELAY_NORMAL
                 )
+            } else {
+                Log.w(TAG, "Proximity sensor not available on this device")
             }
         }
 
         if (wakeOnShake) {
             val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             if (accelerometer != null) {
+                Log.d(TAG, "Accelerometer registered for shake detection")
                 accelerometerListener = object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent) {
                         val x = event.values[0]
@@ -57,9 +70,10 @@ class SensorWakeManager @Inject constructor(
                         val magnitude = sqrt((x * x + y * y + z * z).toDouble())
                         val netAcceleration = magnitude - SensorManager.GRAVITY_EARTH
 
-                        val now = System.currentTimeMillis()
-                        if (netAcceleration > 12.0 && now - lastShakeTrigger > 2000L) {
-                            lastShakeTrigger = now
+                        val eventTime = System.currentTimeMillis()
+                        if (netAcceleration > 12.0 && eventTime - lastShakeTrigger > 2000L) {
+                            lastShakeTrigger = eventTime
+                            Log.d(TAG, "Shake wake triggered (netAcceleration=%.1f)".format(netAcceleration))
                             onWake()
                         }
                     }
@@ -71,13 +85,21 @@ class SensorWakeManager @Inject constructor(
                     accelerometer,
                     SensorManager.SENSOR_DELAY_NORMAL
                 )
+            } else {
+                Log.w(TAG, "Accelerometer not available on this device")
             }
         }
     }
 
     fun stop() {
-        proximityListener?.let { sensorManager.unregisterListener(it) }
-        accelerometerListener?.let { sensorManager.unregisterListener(it) }
+        proximityListener?.let {
+            sensorManager.unregisterListener(it)
+            Log.d(TAG, "Proximity sensor unregistered")
+        }
+        accelerometerListener?.let {
+            sensorManager.unregisterListener(it)
+            Log.d(TAG, "Accelerometer unregistered")
+        }
         proximityListener = null
         accelerometerListener = null
     }

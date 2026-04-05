@@ -123,6 +123,7 @@ fun SettingsDrawerContent(
             Spacer(modifier = Modifier.height(8.dp))
             KioskSection(
                 lockTaskEnabled = config.lockTaskEnabled,
+                pinEnabled = config.pinEnabled,
                 pin = config.pin,
                 onUpdate = { key, value -> viewModel.updateConfig(key, value) }
             )
@@ -456,6 +457,7 @@ private fun DropdownRow(
 @Composable
 private fun KioskSection(
     lockTaskEnabled: Boolean,
+    pinEnabled: Boolean,
     pin: String,
     onUpdate: (String, String) -> Unit
 ) {
@@ -465,37 +467,45 @@ private fun KioskSection(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    var showPinChange by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text("PIN atual", style = MaterialTheme.typography.bodyMedium)
-            Text(
-                "****",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        OutlinedButton(onClick = { showPinChange = true }) {
-            Text("Alterar PIN")
-        }
+    SwitchRow("Proteção por PIN", pinEnabled) {
+        onUpdate("pinEnabled", it.toString())
     }
 
-    if (showPinChange) {
-        PinChangeDialog(
-            currentPin = pin,
-            onConfirm = { newPin ->
-                onUpdate("pin", newPin)
-                showPinChange = false
-            },
-            onDismiss = { showPinChange = false }
-        )
+    if (pinEnabled) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        var showPinChange by remember { mutableStateOf(false) }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("PIN atual", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "****",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            OutlinedButton(onClick = { showPinChange = true }) {
+                Text("Alterar PIN")
+            }
+        }
+
+        if (showPinChange) {
+            PinChangeDialog(
+                currentPin = pin,
+                onConfirm = { newPin ->
+                    onUpdate("pin", newPin)
+                    showPinChange = false
+                },
+                onDismiss = { showPinChange = false }
+            )
+        }
     }
 }
 

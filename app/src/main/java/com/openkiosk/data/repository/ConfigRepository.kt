@@ -28,6 +28,7 @@ class ConfigRepository @Inject constructor(
             cameraPollingIntervalSeconds = map["cameraPollingIntervalSeconds"]?.toIntOrNull() ?: 5,
             autoRefreshMinutes = map["autoRefreshMinutes"]?.toIntOrNull() ?: 30,
             lockTaskEnabled = map["lockTaskEnabled"]?.toBooleanStrictOrNull() ?: true,
+            pinEnabled = map["pinEnabled"]?.toBooleanStrictOrNull() ?: false,
             pin = map["pin"] ?: "0000",
             startUrl = map["startUrl"] ?: "https://www.google.com"
         )
@@ -49,6 +50,7 @@ class ConfigRepository @Inject constructor(
             ConfigEntity("cameraPollingIntervalSeconds", config.cameraPollingIntervalSeconds.toString()),
             ConfigEntity("autoRefreshMinutes", config.autoRefreshMinutes.toString()),
             ConfigEntity("lockTaskEnabled", config.lockTaskEnabled.toString()),
+            ConfigEntity("pinEnabled", config.pinEnabled.toString()),
             ConfigEntity("pin", config.pin),
             ConfigEntity("startUrl", config.startUrl)
         ))
