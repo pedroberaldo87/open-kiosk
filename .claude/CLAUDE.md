@@ -29,7 +29,7 @@ com.openkiosk/
     local/               # AppDatabase, entities, DAOs
     repository/          # ConfigRepository, PlaylistRepository
   sensors/               # MotionDetectionAnalyzer, MotionDetectionManager, SensorWakeManager
-  sleep/                 # ScreenStateManager (ACTIVE/DIM/SLEEP state machine)
+  sleep/                 # ScreenStateManager (ACTIVE/DIM/SLEEP/DEEP_SLEEP state machine)
   kiosk/                 # KioskLockManager (Lock Task Mode + immersive fallback)
   webview/               # WebViewRecoveryManager (auto-refresh, error retry)
   receiver/              # KioskDeviceAdminReceiver, BootReceiver
@@ -60,6 +60,19 @@ com.openkiosk/
 - **Sleep:** Simula tela desligada via brightness=0 + overlay preto (nunca chama lockNow/PowerManager)
 - **PIN:** Ativável/desativável nas settings. Desativado por default. Protege acesso ao drawer de settings
 
+## Gestão de Energia (State Machine)
+```
+ACTIVE → DIM → SLEEP → DEEP_SLEEP
+  ↑        ↑      ↑        ↑
+  └────────┴──────┴────────┘  (toque ou sensor acorda → ACTIVE)
+```
+- **ACTIVE** — tela normal, sensores desligados, timer de inatividade rodando
+- **DIM** — brightness reduzido, câmera contínua + sensores (resposta rápida)
+- **SLEEP** — brightness=0 + overlay preto, câmera pulsada (1.5s ligada a cada Ns) + sensores
+- **DEEP_SLEEP** — brightness=0 + overlay preto, TODOS sensores/câmera desligados, só toque acorda
+- **Câmera pulsada (SLEEP):** usa clearAnalyzer/setAnalyzer no ImageAnalysis — câmera fica em standby mas CPU não processa frames entre pulsos. previousFrame persiste entre pulsos, permitindo detecção imediata
+- **Deep sleep:** ativado por faixa de horário configurável (ex: 22:00-06:00), não por timeout. Quando dentro da janela, DIM/SLEEP são pulados — vai direto pra DEEP_SLEEP após inatividade
+
 ## Dependências Críticas
 - **CameraX** (ImageAnalysis) — detecção de movimento via Y-plane grayscale diff, sem ML
 - **DevicePolicyManager** — Lock Task Mode requer device owner via ADB (usado só no KioskLockManager)
@@ -71,9 +84,11 @@ com.openkiosk/
 ## Decisões de Arquitetura
 - Sleep nunca desliga tela no OS (sem lockNow, sem WakeLock) — simula via brightness=0 + overlay preto, como Fully Kiosk
 - FLAG_KEEP_SCREEN_ON sempre ativa — Activity nunca é suspensa pelo OS, sensores continuam rodando
-- Câmera motion detection liga apenas em DIM/SLEEP, desliga em ACTIVE (economia de bateria)
+- Câmera motion detection: contínua em DIM, pulsada em SLEEP, desligada em ACTIVE e DEEP_SLEEP
+- Câmera pulsada usa clearAnalyzer/setAnalyzer (não unbind/rebind) — preserva previousFrame entre pulsos
+- Deep sleep por faixa de horário (não timeout) — ScreenStateManager checa Calendar.HOUR_OF_DAY a cada 60s
 - Pixel threshold individual = 15 (de 0-255) — baixado de 30 pra funcionar em low-light no Fire HD 8
-- Proximity/shake sensors mesma lógica — ativos só quando precisam acordar a tela
+- Proximity/shake sensors mesma lógica — ativos em DIM/SLEEP, desligados em ACTIVE/DEEP_SLEEP
 - PIN desativado por default — primeiro uso sem barreira
 
 ## Gotchas
@@ -85,6 +100,8 @@ com.openkiosk/
 - **Keystore** em **keystore/open-kiosk.jks** — não commitada no git, senhas em **local.properties**
 - **Orientação** forçada landscape no manifest
 - **Proximity debounce** inicializa com currentTimeMillis() — evita wake imediato no start
+- **Runnables mutuamente recursivos** — captureRunnable/sleepRunnable no MotionDetectionManager usam `object : Runnable` (não lambda) pra evitar erro de type inference recursivo do Kotlin
+- **Deep sleep janela cruzando meia-noite** — lógica trata start>end (22:00-06:00) com `hour >= start || hour < end`
 
 ## Comandos Úteis
 ```bash
@@ -105,7 +122,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 # Release: app/build/outputs/apk/release/app-release.apk
 
 # Install no device
-adb install app/build/outputs/apk/release/app-release.apk
+adb install -r app/build/outputs/apk/release/app-release.apk
 
 # Set device owner (full kiosk lock)
 adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver
@@ -113,8 +130,8 @@ adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver
 # Remove device owner
 adb shell dpm remove-active-admin com.openkiosk/.receiver.KioskDeviceAdminReceiver
 
-# Debug logs (sensores e câmera)
-adb logcat -s KioskViewModel:D MotionDetection:D SensorWake:D
+# Debug logs (sensores, câmera e state machine)
+adb logcat -s KioskViewModel:D MotionDetection:D SensorWake:D ScreenState:D
 ```
 
 <!-- project-doc:end -->
