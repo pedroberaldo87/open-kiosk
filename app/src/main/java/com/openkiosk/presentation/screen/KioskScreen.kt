@@ -9,15 +9,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.openkiosk.presentation.component.KioskWebView
 import com.openkiosk.presentation.component.OfflineScreen
 import com.openkiosk.presentation.component.PinDialog
 import com.openkiosk.presentation.viewmodel.KioskViewModel
+import com.openkiosk.presentation.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -27,12 +30,14 @@ fun KioskScreen(viewModel: KioskViewModel) {
     val needsRefresh by viewModel.needsRefresh.collectAsState()
     val config by viewModel.config.collectAsState()
 
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showPinDialog by remember { mutableStateOf(false) }
+    var pinVerified by remember { mutableStateOf(false) }
 
-    // Use a key that changes when we need to refresh
-    var refreshKey by remember { mutableStateOf(0) }
+    var refreshKey by remember { mutableIntStateOf(0) }
     LaunchedEffect(needsRefresh) {
         if (needsRefresh) {
             refreshKey++
@@ -40,12 +45,20 @@ fun KioskScreen(viewModel: KioskViewModel) {
         }
     }
 
+    // Reset pinVerified when drawer closes
+    LaunchedEffect(drawerState.isClosed) {
+        if (drawerState.isClosed) {
+            pinVerified = false
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = true,
+        gesturesEnabled = !showPinDialog,
         drawerContent = {
-            SettingsScreen(
-                onBack = { scope.launch { drawerState.close() } }
+            SettingsDrawerContent(
+                viewModel = settingsViewModel,
+                onClose = { scope.launch { drawerState.close() } }
             )
         }
     ) {
@@ -54,7 +67,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
                 OfflineScreen()
             } else {
                 val urlToLoad = currentUrl.ifBlank { config.startUrl }
-                key(refreshKey) {
+                androidx.compose.runtime.key(refreshKey) {
                     KioskWebView(
                         url = urlToLoad,
                         onUserInteraction = { viewModel.onUserInteraction() },
@@ -67,10 +80,10 @@ fun KioskScreen(viewModel: KioskViewModel) {
         }
     }
 
-    // PIN dialog gate for settings drawer
+    // PIN dialog gate: intercept drawer open gesture
     LaunchedEffect(drawerState.isOpen) {
-        if (drawerState.isOpen && !showPinDialog) {
-            // Drawer was opened by gesture — close it and show PIN dialog
+        if (drawerState.isOpen && !pinVerified) {
+            // Drawer opened by gesture without PIN — close and ask for PIN
             drawerState.close()
             showPinDialog = true
         }
@@ -81,14 +94,10 @@ fun KioskScreen(viewModel: KioskViewModel) {
             correctPin = config.pin,
             onSuccess = {
                 showPinDialog = false
+                pinVerified = true
                 scope.launch { drawerState.open() }
             },
             onDismiss = { showPinDialog = false }
         )
     }
-}
-
-@Composable
-private fun key(key: Int, content: @Composable () -> Unit) {
-    androidx.compose.runtime.key(key) { content() }
 }
