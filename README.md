@@ -9,7 +9,7 @@ Open-source Android kiosk browser for digital signage. A lightweight alternative
 ## Screenshots
 
 <p>
-  <img src="screenshots/settings-drawer.png" width="400" />
+  <img src="screenshots/settings-sensors.png" width="400" />
   <img src="screenshots/settings-kiosk.png" width="400" />
 </p>
 
