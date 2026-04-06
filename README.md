@@ -6,6 +6,23 @@
 
 Open-source Android kiosk browser for digital signage. A lightweight alternative to Fully Kiosk Browser.
 
+## Screenshots
+
+<p>
+  <img src="screenshots/settings-drawer.png" width="400" />
+  <img src="screenshots/settings-kiosk.png" width="400" />
+</p>
+
+## Recommended Content
+
+Looking for something to display on your kiosk? Check out **[Daily Screen](https://github.com/pedroberaldo87/daily-screen)** — a wall-mounted daily assistant designed for tablets. Displays a daily checklist of medications, supplements, and reminders with progress tracking, weather forecast, and offline support. Built specifically for the same hardware (Fire HD 8, 1280×800 landscape).
+
+<p>
+  <img src="screenshots/daily-screen-checklist.png" width="260" />
+  <img src="screenshots/daily-screen-progress.png" width="260" />
+  <img src="screenshots/daily-screen-alldone.png" width="260" />
+</p>
+
 ## Features
 
 - **URL Playlist** — Configure multiple URLs with individual rotation timers
