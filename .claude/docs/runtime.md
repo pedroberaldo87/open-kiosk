@@ -1,5 +1,6 @@
 ---
 generated: 2026-08-15
+generated-commit: 90934e0
 project: open-kiosk
 scope:
   - app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt

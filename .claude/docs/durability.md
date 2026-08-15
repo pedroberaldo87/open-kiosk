@@ -1,5 +1,6 @@
 ---
 generated: 2026-08-15
+generated-commit: 90934e0
 project: open-kiosk
 scope: [app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/AndroidManifest.xml, app/build.gradle.kts, app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt, app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt, app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt, app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt]
 verified-by: "adb shell run-as com.openkiosk ls -l files/../databases/ e .../shared_prefs/ no tablet; grep -rn \"getSharedPreferences|Room.databaseBuilder|allowBackup\" app/src/main; ./gradlew test"
