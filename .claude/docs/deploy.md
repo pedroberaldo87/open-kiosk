@@ -65,6 +65,7 @@ Os dois caminhos existem no disco (`ls -d` em cada um retorna o proprio caminho)
 
 - Saida debug: `app/build/outputs/apk/debug/app-debug.apk`. O arquivo existe no disco com 56M (`ls -lh app/build/outputs/apk/debug/app-debug.apk`), o que bate com o "~56MB" escrito no README. [confirmado]
 - Nao existe `app/build/outputs/apk/release/` (`ls app/build/outputs/apk/` -> so `debug`): o "~2.4MB" do README para o release nao pode ser conferido aqui. [confirmado que a pasta nao existe]
+- O CI nao roda os testes: `build.yml` executa `lintDebug` e `assembleDebug`. O portao local completo e `./gradlew compileDebugKotlin testDebugUnitTest lintDebug`, hoje com 33 testes verdes. [confirmado]
 
 ## Assinar o release
 
@@ -174,17 +175,17 @@ adb shell dpm remove-active-admin com.openkiosk/.receiver.KioskDeviceAdminReceiv
 adb logcat -s KioskViewModel:D MotionDetection:D SensorWake:D ScreenState:D
 ```
 
-- O README lista a variante sem `ScreenState:D`; a forma acima e a que consta em `.claude/CLAUDE.md`. [confirmado que os dois textos diferem]
+- O README passou a listar a mesma forma completa, com `ScreenState:D`, `KioskWatchdog:D` e `PowerState:D`, mais o que cada linha de log significa. [confirmado]
 
 ## Correcoes a fazer na documentacao existente
 
-- `README.md`, secao "Tested Hardware", diz `Amazon Fire HD 8 (FireOS / Android 9+)`; o aparelho de producao roda Fire OS com base Android 11. [confirmado o texto do README; base 11 e relatado]
-- `README.md` nao documenta o provisionamento por cabo — so o device owner, que e justamente o que nao passa no Fire de producao. [confirmado]
+- `README.md`, secao "Tested Hardware", diz `Amazon Fire HD 8 (KFRAPWI, FireOS on Android 11 base)` — corrigido nesta rodada, junto da lista do que foi verificado no aparelho. [confirmado]
+- `README.md` passou a documentar o provisionamento por cabo numa secao propria ("If device owner is refused (retail Amazon Fire)"), com os cinco comandos e o aviso de que a permissao de sobreposicao e obrigatoria para o vigia relancar. [confirmado]
 - `CHANGELOG.md`, entrada `[1.0.0]`, diz `Internationalization support (English + Portuguese)`, mas `app/src/main/res/` tem `values-es`. [confirmado]
 
 ## Pendencias
 
 - [TODO: sem workflow de release] Nao ha job de tag, assinatura no CI nem publicacao de APK — o release e sempre manual, na maquina do dono.
 - [TODO: CI nao roda testes] `build.yml` executa `lintDebug` e `assembleDebug`; os 14 testes de `app/src/test` nunca rodam no CI.
-- [TODO: release nunca verificado aqui] Sem keystore no disco e sem JDK neste shell, `assembleRelease` (e o tamanho ~2,4 MB do README) fica sem confirmacao.
+- [TODO: release nunca verificado aqui] Com `JAVA_HOME` apontado para o JDK do Android Studio o debug compila e os testes passam, mas sem keystore no disco o `assembleRelease` (e o tamanho ~2,4 MB que o README afirma) continua sem confirmacao.
 - [TODO: sem exportar configuracao] Playlist e ajustes nao saem do aparelho; trocar de tablet exige redigitar tudo. Registrado tambem no doc de durabilidade.
