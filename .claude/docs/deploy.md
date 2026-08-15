@@ -1,10 +1,10 @@
 ---
 generated: 2026-08-15
-generated-commit: 90934e0
+generated-commit: 12c9ede
 project: open-kiosk
 scope: [app/build.gradle.kts, build.gradle.kts, settings.gradle.kts, gradle/libs.versions.toml, gradle/wrapper/gradle-wrapper.properties, gradle.properties, .github/workflows/build.yml, app/src/main/AndroidManifest.xml, app/proguard-rules.pro, app/src/main/res/xml/network_security_config.xml, app/src/main/res/xml/device_admin_policies.xml, .gitignore, CHANGELOG.md, README.md]
 verified-by: "./gradlew lintDebug && ./gradlew test && ./gradlew assembleDebug (JDK 17); no aparelho: adb install -r app/build/outputs/apk/debug/app-debug.apk e adb shell dumpsys package com.openkiosk | grep -i SYSTEM_ALERT_WINDOW"
-doc-sig: open-kiosk/build.gradle.kts@gen=3.8#80dc59eb
+doc-sig: open-kiosk/build.gradle.kts@gen=3.8#4ef8df2d
 ---
 
 # Deploy — como se compila, assina, testa e instala
