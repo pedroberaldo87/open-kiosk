@@ -2,6 +2,7 @@ package com.openkiosk.presentation.screen
 
 import android.app.Activity
 import android.content.Context
+import com.openkiosk.data.local.KioskPrefs
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -115,7 +116,6 @@ fun SettingsDrawerContent(
                 wakeOnProximity = config.wakeOnProximity,
                 wakeOnShake = config.wakeOnShake,
                 motionSensitivity = config.motionSensitivity,
-                cameraPolling = config.cameraPollingIntervalSeconds,
                 deepSleepEnabled = config.deepSleepEnabled,
                 deepSleepStartHour = config.deepSleepStartHour,
                 deepSleepEndHour = config.deepSleepEndHour,
@@ -351,7 +351,6 @@ private fun SleepWakeSection(
     wakeOnProximity: Boolean,
     wakeOnShake: Boolean,
     motionSensitivity: MotionSensitivity,
-    cameraPolling: Int,
     deepSleepEnabled: Boolean,
     deepSleepStartHour: Int,
     deepSleepEndHour: Int,
@@ -409,20 +408,6 @@ private fun SleepWakeSection(
         onSelect = { label ->
             val index = sensitivityEntries.map { sensitivityLabels[it]!! }.indexOf(label)
             if (index >= 0) onUpdate("motionSensitivity", sensitivityEntries[index].name)
-        }
-    )
-
-    Spacer(modifier = Modifier.height(4.dp))
-
-    val pollingOptions = listOf(1, 2, 3, 5, 10)
-    val pollingLabels = pollingOptions.map { stringResource(R.string.suffix_seconds, it) }
-    DropdownRow(
-        label = stringResource(R.string.label_camera_polling),
-        selected = stringResource(R.string.suffix_seconds, cameraPolling),
-        options = pollingLabels,
-        onSelect = { label ->
-            val index = pollingLabels.indexOf(label)
-            if (index >= 0) onUpdate("cameraPollingIntervalSeconds", pollingOptions[index].toString())
         }
     )
 
@@ -524,7 +509,7 @@ private fun DropdownRow(
 @Composable
 private fun LanguageSection() {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("open_kiosk_prefs", Context.MODE_PRIVATE)
+    val prefs = KioskPrefs.of(context)
     val currentLang = prefs.getString("language", "auto") ?: "auto"
 
     val languages = listOf(

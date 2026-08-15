@@ -26,7 +26,6 @@
     <string name="switch_wake_proximity">Wake on proximity</string>
     <string name="switch_wake_shake">Wake on shake</string>
     <string name="label_camera_sensitivity">Camera sensitivity</string>
-    <string name="label_camera_polling">Camera polling</string>
     <string name="label_camera_pulse">Camera pulse (sleep)</string>
     <string name="switch_deep_sleep">Deep sleep (touch-only)</string>
     <string name="label_deep_sleep_start">Start</string>

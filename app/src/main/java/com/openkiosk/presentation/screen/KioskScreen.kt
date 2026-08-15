@@ -78,6 +78,8 @@ fun KioskScreen(viewModel: KioskViewModel) {
                     KioskWebView(
                         url = urlToLoad,
                         onUserInteraction = { viewModel.onUserInteraction() },
+                        paused = screenState == ScreenState.SLEEP ||
+                            screenState == ScreenState.DEEP_SLEEP,
                         modifier = Modifier.fillMaxSize(),
                         onError = { viewModel.onWebViewError() },
                         onPageLoaded = { viewModel.onWebViewPageLoaded() }

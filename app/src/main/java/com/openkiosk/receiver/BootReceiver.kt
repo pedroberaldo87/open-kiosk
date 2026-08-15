@@ -3,6 +3,7 @@ package com.openkiosk.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.openkiosk.service.KioskWatchdogService
 
 class BootReceiver : BroadcastReceiver() {
 
@@ -16,6 +17,7 @@ class BootReceiver : BroadcastReceiver() {
             if (launchIntent != null) {
                 context.startActivity(launchIntent)
             }
+            KioskWatchdogService.start(context)
         }
     }
 }

@@ -16,8 +16,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "MotionDetection"
-private const val CAPTURE_WINDOW_MS = 1500L
-private const val PULSED_POLLING_MS = 500L
+// janela longa o bastante para varias comparacoes: com amostra a cada PULSED_POLLING_MS, a
+// primeira vira referencia e as demais sao comparadas (~12 comparacoes por pulso).
+private const val CAPTURE_WINDOW_MS = 2500L
+private const val PULSED_POLLING_MS = 200L
+// teto do intervalo CEGO entre pulsos. Com CAPTURE_WINDOW_MS=2500 o ciclo enxerga ~38% do tempo
+// (2500 de cada 6500ms), entao quem atravessa em ~2s cai dentro de uma janela na maioria das
+// passagens. A camera fica ligada entre pulsos de qualquer jeito (nao ha unbind), entao gap maior
+// nao economiza energia — so cega. cameraPulseIntervalSeconds ainda vale para valores menores.
+// knob de campo: subir se a CPU do tablet reclamar; baixar se pessoa rapida escapar.
+private const val MAX_PULSE_GAP_MS = 4000L
+// cadencia de AMOSTRAGEM na analise continua (DIM): distancia entre os dois quadros comparados.
+// Tem que ser curta o bastante para pegar alguem atravessando em 1-2s — a config
+// cameraPollingIntervalSeconds (5s) e cadencia de PULSO, nunca de amostragem.
+// knob de campo: subir se a CPU do tablet reclamar; baixar se pessoa rapida escapar.
+private const val CONTINUOUS_POLLING_MS = 200L
 
 @Singleton
 class MotionDetectionManager @Inject constructor(
@@ -29,31 +42,36 @@ class MotionDetectionManager @Inject constructor(
     private val analyzerExecutor = Executors.newSingleThreadExecutor()
     private val pulseHandler = Handler(Looper.getMainLooper())
 
+    /** Incremented by every start()/stop(); an async bind aborts if it changed meanwhile. */
+    private var generation = 0
+
     private var _pulsedMode = false
     private var _pulseIntervalMs = 5000L
-    private var originalPollingIntervalMs = 5000L
 
     var isRunning: Boolean = false
         private set
 
     fun start(
         lifecycleOwner: LifecycleOwner,
-        pollingIntervalMs: Long,
         threshold: Double,
         onMotion: () -> Unit
     ) {
-        Log.d(TAG, "Camera start requested (polling=${pollingIntervalMs}ms, threshold=$threshold)")
-        originalPollingIntervalMs = pollingIntervalMs
+        Log.d(TAG, "Camera start requested (polling=${CONTINUOUS_POLLING_MS}ms, threshold=$threshold)")
+        val myGeneration = ++generation
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             try {
                 val provider = cameraProviderFuture.get()
+                if (myGeneration != generation) {
+                    Log.d(TAG, "Camera start aborted — stop() ran while provider was loading")
+                    return@addListener
+                }
                 cameraProvider = provider
                 Log.d(TAG, "Camera provider obtained successfully")
 
                 val motionAnalyzer = MotionDetectionAnalyzer(
-                    pollingIntervalMs = pollingIntervalMs,
+                    pollingIntervalMs = CONTINUOUS_POLLING_MS,
                     motionThreshold = threshold,
                     onMotionDetected = onMotion
                 )
@@ -91,6 +109,7 @@ class MotionDetectionManager @Inject constructor(
         if (isRunning) {
             Log.d(TAG, "Stopping camera motion detection")
         }
+        generation++
         stopPulseCycle()
         _pulsedMode = false
         cameraProvider?.unbindAll()
@@ -99,7 +118,8 @@ class MotionDetectionManager @Inject constructor(
         isRunning = false
     }
 
-    fun updateConfig(pollingIntervalMs: Long, threshold: Double) {
+    /** Reaplica a sensibilidade no analyzer vivo quando a config do banco muda. */
+    fun updateConfig(threshold: Double) {
         analyzer?.updateThreshold(threshold)
     }
 
@@ -109,9 +129,12 @@ class MotionDetectionManager @Inject constructor(
      */
     fun enablePulsedMode(intervalMs: Long) {
         _pulsedMode = true
-        _pulseIntervalMs = intervalMs
+        // O intervalo escolhido pelo dono MANDA: o menu oferece 5-60s e o teto antigo de
+        // 4s engolia todos em silencio. Na tomada nem ha pulso (analise continua), entao
+        // aqui e sempre bateria — onde economizar e o ponto.
+        _pulseIntervalMs = intervalMs.coerceAtLeast(1_000L)
         if (isRunning) startPulseCycle()
-        Log.d(TAG, "Pulsed mode enabled: capture ${CAPTURE_WINDOW_MS}ms every ${intervalMs}ms")
+        Log.d(TAG, "Pulsed mode enabled: capture ${CAPTURE_WINDOW_MS}ms every ${_pulseIntervalMs}ms")
     }
 
     /**
@@ -122,7 +145,8 @@ class MotionDetectionManager @Inject constructor(
         stopPulseCycle()
         if (isRunning) {
             analyzer?.let { a ->
-                a.updatePollingInterval(originalPollingIntervalMs)
+                a.reset()
+                a.updatePollingInterval(CONTINUOUS_POLLING_MS)
                 imageAnalysis?.setAnalyzer(analyzerExecutor, a)
             }
             Log.d(TAG, "Pulsed mode disabled — continuous analysis restored")
@@ -131,10 +155,9 @@ class MotionDetectionManager @Inject constructor(
 
     private fun startPulseCycle() {
         stopPulseCycle()
-        // Immediately clear analyzer, schedule first capture
-        imageAnalysis?.clearAnalyzer()
-        pulseHandler.postDelayed(captureRunnable, _pulseIntervalMs)
-        Log.d(TAG, "Pulse cycle started — sleeping for ${_pulseIntervalMs}ms")
+        // Primeira janela AGORA: entrar em SLEEP nao pode custar um intervalo inteiro de cegueira.
+        pulseHandler.post(captureRunnable)
+        Log.d(TAG, "Pulse cycle started — capturing immediately")
     }
 
     private fun stopPulseCycle() {
@@ -146,6 +169,8 @@ class MotionDetectionManager @Inject constructor(
         override fun run() {
             if (!isRunning || !_pulsedMode) return
             analyzer?.let { a ->
+                // a camera nunca foi desligada entre pulsos (so o analyzer): sem aquecimento
+                a.reset(warmup = false)
                 a.updatePollingInterval(PULSED_POLLING_MS)
                 imageAnalysis?.setAnalyzer(analyzerExecutor, a)
             }

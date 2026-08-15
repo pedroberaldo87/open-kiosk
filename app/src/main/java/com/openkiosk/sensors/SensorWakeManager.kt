@@ -13,6 +13,17 @@ import kotlin.math.sqrt
 
 private const val TAG = "SensorWake"
 
+/** Distancia (cm) abaixo da qual a leitura conta como "perto" — histerese contra reflexo espurio. */
+private const val NEAR_DISTANCE_CM = 5f
+
+/** So a TRANSICAO longe -> perto acorda a tela; leitura perto sustentada nao redispara. */
+internal fun isNear(value: Float, maxRange: Float): Boolean =
+    value < minOf(maxRange / 2f, NEAR_DISTANCE_CM)
+
+/** prevNear == null: primeira leitura apos o registro, so linha de base — nunca acorda a tela. */
+internal fun isApproach(prevNear: Boolean?, value: Float, maxRange: Float): Boolean =
+    prevNear == false && isNear(value, maxRange)
+
 @Singleton
 class SensorWakeManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -21,15 +32,22 @@ class SensorWakeManager @Inject constructor(
     private var proximityListener: SensorEventListener? = null
     private var accelerometerListener: SensorEventListener? = null
     private var lastProximityTrigger = 0L
+    @Volatile private var proximityNear: Boolean? = null
     private var lastShakeTrigger = 0L
+    private var startedWith: Pair<Boolean, Boolean>? = null
 
     fun start(wakeOnProximity: Boolean, wakeOnShake: Boolean, onWake: () -> Unit) {
+        // Ja registrado com os mesmos sensores: re-registrar zeraria a linha de base da
+        // proximidade (proximityNear = null) e a primeira aproximacao seria engolida.
+        if (startedWith == Pair(wakeOnProximity, wakeOnShake)) return
         stop()
+        startedWith = Pair(wakeOnProximity, wakeOnShake)
 
         // Initialize debounce timestamps to now — prevents immediate trigger on first event
         val now = System.currentTimeMillis()
         lastProximityTrigger = now
         lastShakeTrigger = now
+        proximityNear = null
 
         if (wakeOnProximity) {
             val proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
@@ -38,10 +56,13 @@ class SensorWakeManager @Inject constructor(
                 Log.d(TAG, "Proximity sensor registered (maxRange=$maxRange)")
                 proximityListener = object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent) {
+                        val value = event.values[0]
                         val eventTime = System.currentTimeMillis()
-                        if (event.values[0] < maxRange && eventTime - lastProximityTrigger > 1000L) {
+                        val approach = isApproach(proximityNear, value, maxRange)
+                        proximityNear = isNear(value, maxRange)
+                        if (approach && eventTime - lastProximityTrigger > 1000L) {
                             lastProximityTrigger = eventTime
-                            Log.d(TAG, "Proximity wake triggered (value=${event.values[0]}, maxRange=$maxRange)")
+                            Log.d(TAG, "Proximity wake triggered (value=$value, maxRange=$maxRange)")
                             onWake()
                         }
                     }
@@ -102,5 +123,6 @@ class SensorWakeManager @Inject constructor(
         }
         proximityListener = null
         accelerometerListener = null
+        startedWith = null
     }
 }

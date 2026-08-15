@@ -77,33 +77,42 @@ ACTIVE → DIM → SLEEP → DEEP_SLEEP
 ```
 - **ACTIVE** — tela normal, sensores desligados, timer de inatividade rodando
 - **DIM** — brightness reduzido, câmera contínua + sensores (resposta rápida)
-- **SLEEP** — brightness=0 + overlay preto, câmera pulsada (1.5s ligada a cada Ns) + sensores
+- **SLEEP** — brightness=0 + overlay preto + sensores; a câmera depende da ENERGIA: na tomada analisa contínuo (sem vão cego), na bateria pulsa (2,5s a cada intervalo configurado)
 - **DEEP_SLEEP** — brightness=0 + overlay preto, TODOS sensores/câmera desligados, só toque acorda
-- **Câmera pulsada (SLEEP):** usa clearAnalyzer/setAnalyzer no ImageAnalysis — câmera fica em standby mas CPU não processa frames entre pulsos. previousFrame persiste entre pulsos, permitindo detecção imediata
+- **Câmera pulsada (SLEEP na bateria):** usa clearAnalyzer/setAnalyzer no ImageAnalysis — câmera fica em standby mas CPU não processa frames entre pulsos. `previousFrame` é ZERADO a cada pulso (`reset(warmup=false)`): comparar com um quadro de 10s atrás não pega quem passou e ainda gera falso positivo por deriva de luz
+- **Sem activity anexada a máquina de estado CONGELA** — transição destacada gravaria em disco um SLEEP fantasma, e o watchdog leria isso como "não acenda", deixando o quiosque atrás do anúncio
 - **Deep sleep:** ativado por faixa de horário configurável (ex: 22:00-06:00), não por timeout. Quando dentro da janela, DIM/SLEEP são pulados — vai direto pra DEEP_SLEEP após inatividade
 
 ## Dependências Críticas
 - **CameraX** (ImageAnalysis) — detecção de movimento via Y-plane grayscale diff, sem ML
 - **DevicePolicyManager** — Lock Task Mode requer device owner via ADB (usado só no KioskLockManager)
-- **WebViewRecoveryManager** — retry com exponential backoff (5s→15s→30s→60s)
+- **WebViewRecoveryManager** — retry com exponential backoff (5s→15s→30s→60s); auto-refresh com intervalo 0 ("desativado") não agenda nada
+- **KioskWatchdogService** — foreground service que prende o processo (START_STICKY) e relança a MainActivity quando algo a cobre; espaça as tentativas (5s dobrando até 60s) em vez de repostar idêntico
+- **PowerStateMonitor** — avisa quando o carregador entra/sai; é ele que troca o modo da câmera em SLEEP
 
 ## Hardware Testado
-- **Amazon Fire HD 8** — câmera frontal funciona, shake funciona, proximity sensor NÃO existe neste device
+- **Amazon Fire HD 8** (KFRAPWI, Fire OS base Android 11) — câmera frontal funciona, shake funciona, proximity sensor NÃO existe neste device (confirmado: `pm list features` só lista accelerometer)
+- **Verificado em campo (2026-08-15):** ciclo ACTIVE→DIM→SLEEP com 0 falsos positivos, troca tomada↔bateria trocando o modo da câmera, watchdog trazendo o app de volta em ~9s, 184MB PSS com 1 WebView
 
 ## Decisões de Arquitetura
 - Sleep nunca desliga tela no OS (sem lockNow, sem WakeLock) — simula via brightness=0 + overlay preto, como Fully Kiosk
 - FLAG_KEEP_SCREEN_ON sempre ativa — Activity nunca é suspensa pelo OS, sensores continuam rodando
-- Câmera motion detection: contínua em DIM, pulsada em SLEEP, desligada em ACTIVE e DEEP_SLEEP
-- Câmera pulsada usa clearAnalyzer/setAnalyzer (não unbind/rebind) — preserva previousFrame entre pulsos
+- Câmera motion detection: contínua em DIM, por energia em SLEEP (tomada=contínua, bateria=pulsada), desligada em ACTIVE e DEEP_SLEEP
+- Câmera pulsada usa clearAnalyzer/setAnalyzer (não unbind/rebind) — a câmera nunca é desligada entre pulsos, então o intervalo grande não economiza energia, só cega
 - Deep sleep por faixa de horário (não timeout) — ScreenStateManager checa Calendar.HOUR_OF_DAY a cada 60s
-- Pixel threshold individual = 15 (de 0-255) — baixado de 30 pra funcionar em low-light no Fire HD 8
-- Proximity/shake sensors mesma lógica — ativos em DIM/SLEEP, desligados em ACTIVE/DEEP_SLEEP
+- Movimento = fração de pixels alterados APÓS descontar o deslocamento global de luz (mediana das diferenças, em `changedPixelRatio`) — sem isso a tela escurecendo à noite era lida como pessoa passando
+- Pixel threshold individual = 20 (de 0-255) — 30 descartava pessoa em luz fraca, 15 deixava passar ruído de ganho. Piso de ruído medido no Fire: 0,0025 contra limiar de 0,05 (margem de 20×)
+- Primeiros quadros após o bind são descartados (`WARMUP_FRAMES`) — a exposição automática ainda converge e o quadro inteiro muda de brilho
+- Proximity/shake sensors mesma lógica — ativos em DIM/SLEEP, desligados em ACTIVE/DEEP_SLEEP; desmarcar nas configurações PARA o que já está rodando
+- Config real do Room é um StateFlow nulável (`realConfig`) — decisão irreversível (pedir câmera, entrar em lock task) espera ela, nunca usa o placeholder de fábrica
+- Preferências têm fonte única em **KioskPrefs** — o estado de tela é escrito pelo ScreenStateManager e lido pelo watchdog em outro arquivo; nome repetido faria os dois divergirem em silêncio
 - PIN desativado por default — primeiro uso sem barreira
 - Idioma usa SharedPreferences (não Room) — leitura síncrona em attachBaseContext antes do Hilt
 
 ## Gotchas
-- **Device Owner** requer `adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver` — device sem contas
-- **Sem device owner** o app usa immersive sticky mode (usuário pode escapar com swipe)
+- **Device Owner** requer `adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver` — device sem contas. **No Fire de produção NÃO passa:** o Controle Parental da Amazon (`com.amazon.parentalcontrols`) já é profile owner e há 9 contas Amazon; só depois de restauração de fábrica
+- **Sem device owner** o app usa immersive sticky mode (usuário pode escapar com swipe). O provisionamento por cabo que substitui isso: `adb shell settings put global stay_on_while_plugged_in 7` (tela nunca apaga alimentada), `adb shell locksettings set-disabled true` (mata a lockscreen de propaganda), `adb shell cmd package set-home-activity com.openkiosk/.presentation.MainActivity` (app vira a tela inicial), `adb shell appops set com.openkiosk SYSTEM_ALERT_WINDOW allow` (**sem isso o watchdog não consegue relançar** — o Android bloqueia início de activity em segundo plano)
+- **`com.amazon.kindle.kso`** (Special Offers) é pacote protegido — `pm disable-user` é recusado pelo sistema
 - **Câmera no emulador** não funciona pra motion detection — câmera virtual é estática
 - **HTTP permitido** via **network_security_config.xml** — necessário pra digital signage em redes internas
 - **PIN default** é 0000 (definido em KioskConfig), desativado por default (pinEnabled=false)

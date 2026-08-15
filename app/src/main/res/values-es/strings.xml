@@ -26,7 +26,6 @@
     <string name="switch_wake_proximity">Despertar por proximidad</string>
     <string name="switch_wake_shake">Despertar por movimiento</string>
     <string name="label_camera_sensitivity">Sensibilidad de cámara</string>
-    <string name="label_camera_polling">Polling cámara</string>
     <string name="label_camera_pulse">Pulso cámara (sleep)</string>
     <string name="switch_deep_sleep">Deep sleep (solo toque)</string>
     <string name="label_deep_sleep_start">Inicio</string>

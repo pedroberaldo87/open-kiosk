@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.view.View
 import android.view.WindowInsetsController
@@ -33,6 +35,16 @@ class KioskLockManager @Inject constructor(
             devicePolicyManager.setLockTaskFeatures(
                 adminComponentName,
                 DevicePolicyManager.LOCK_TASK_FEATURE_NONE
+            )
+            devicePolicyManager.setKeyguardDisabled(adminComponentName, true)
+            devicePolicyManager.clearPackagePersistentPreferredActivities(adminComponentName, context.packageName)
+            devicePolicyManager.addPersistentPreferredActivity(
+                adminComponentName,
+                IntentFilter(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_HOME)
+                    addCategory(Intent.CATEGORY_DEFAULT)
+                },
+                ComponentName(context, activity::class.java)
             )
             activity.startLockTask()
         } else {

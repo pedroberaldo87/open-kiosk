@@ -36,6 +36,7 @@ private const val INJECT_JS = """
 fun KioskWebView(
     url: String,
     onUserInteraction: () -> Unit,
+    paused: Boolean,
     modifier: Modifier = Modifier,
     onError: (() -> Unit)? = null,
     onPageLoaded: (() -> Unit)? = null
@@ -43,10 +44,17 @@ fun KioskWebView(
     var webViewKey by remember { mutableIntStateOf(0) }
 
     key(webViewKey) {
+        // Instancia viva desta chave; vira null assim que for destruida
+        val webViewRef = remember { mutableStateOf<WebView?>(null) }
+        // Comparar com webView.url recarregaria a cada recomposicao, porque o
+        // endereco efetivo pos-redirecionamento nunca bate com o pedido.
+        var lastRequestedUrl by remember { mutableStateOf(url) }
+
         AndroidView(
             modifier = modifier,
             factory = { context ->
                 WebView(context).apply {
+                    webViewRef.value = this
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
@@ -78,6 +86,13 @@ fun KioskWebView(
                             detail: android.webkit.RenderProcessGoneDetail?
                         ): Boolean {
                             Log.e(TAG, "Render process gone, crash=${detail?.didCrash()}, priority=${detail?.rendererPriorityAtExit()}")
+                            // Contrato do Android: a instancia morta tem que sair da
+                            // hierarquia E ser destruida, senao o app cai junto.
+                            webViewRef.value = null
+                            view?.let { dead ->
+                                (dead.parent as? ViewGroup)?.removeView(dead)
+                                dead.destroy()
+                            }
                             webViewKey++
                             return true
                         }
@@ -142,15 +157,39 @@ fun KioskWebView(
                 }
             },
             update = { webView ->
-                if (webView.url != url) {
+                if (lastRequestedUrl != url) {
+                    lastRequestedUrl = url
                     webView.loadUrl(url)
                 }
             }
         )
 
+        // Em SLEEP/DEEP_SLEEP a tela fica preta, mas JS/timers/video seguiriam
+        // rodando a plena carga. Congela a instancia viva e descongela ao voltar.
+        LaunchedEffect(paused, webViewRef.value) {
+            webViewRef.value?.let { webView ->
+                if (paused) {
+                    webView.onPause()
+                    webView.pauseTimers()
+                } else {
+                    webView.onResume()
+                    webView.resumeTimers()
+                }
+            }
+        }
+
         DisposableEffect(Unit) {
             onDispose {
-                // WebView cleanup is handled by AndroidView
+                webViewRef.value?.let { webView ->
+                    webViewRef.value = null
+                    webView.stopLoading()
+                    webView.loadUrl("about:blank")
+                    webView.clearHistory()
+                    webView.webChromeClient = null
+                    webView.setOnTouchListener(null)
+                    (webView.parent as? ViewGroup)?.removeView(webView)
+                    webView.destroy()
+                }
             }
         }
     }

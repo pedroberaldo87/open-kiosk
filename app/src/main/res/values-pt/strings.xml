@@ -26,7 +26,6 @@
     <string name="switch_wake_proximity">Acordar por proximidade</string>
     <string name="switch_wake_shake">Acordar por movimento</string>
     <string name="label_camera_sensitivity">Sensibilidade da câmera</string>
-    <string name="label_camera_polling">Polling câmera</string>
     <string name="label_camera_pulse">Pulso câmera (sleep)</string>
     <string name="switch_deep_sleep">Deep sleep (só toque)</string>
     <string name="label_deep_sleep_start">Início</string>

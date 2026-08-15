@@ -15,3 +15,6 @@ keystore/
 *.jks
 *.ap_
 *.dex
+
+# Relatórios visuais de sessão (efêmeros)
+.claude/visual/

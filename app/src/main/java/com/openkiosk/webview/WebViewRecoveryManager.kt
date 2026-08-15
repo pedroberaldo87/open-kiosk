@@ -24,6 +24,12 @@ class WebViewRecoveryManager {
 
     fun startAutoRefresh(onRefresh: () -> Unit) {
         stopAutoRefresh()
+        // "Desativado" no menu chega como 0: agendar com atraso 0 seria recarga em laco
+        // continuo, o oposto de desligar.
+        if (autoRefreshIntervalMs <= 0L) {
+            Log.d(TAG, "Auto-refresh desativado")
+            return
+        }
         val runnable = object : Runnable {
             override fun run() {
                 Log.d(TAG, "Auto-refresh triggered")
@@ -56,6 +62,9 @@ class WebViewRecoveryManager {
         retryCount = 0
         stopRetry()
     }
+
+    /** Visível para o teste do "desativado": nada agendado quando o intervalo é 0. */
+    fun isAutoRefreshScheduled(): Boolean = autoRefreshRunnable != null
 
     fun stop() {
         stopAutoRefresh()
