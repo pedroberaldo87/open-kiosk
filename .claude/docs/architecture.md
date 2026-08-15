@@ -1,10 +1,10 @@
 ---
 generated: 2026-08-15
-generated-commit: 90934e0
+generated-commit: 628b8ea
 project: open-kiosk
 scope: [app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt, app/src/main/java/com/openkiosk/presentation/viewmodel/KioskViewModel.kt, app/src/main/java/com/openkiosk/service/KioskWatchdogService.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt, app/src/main/java/com/openkiosk/kiosk/KioskLockManager.kt, app/src/main/java/com/openkiosk/domain/PlaylistManager.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/presentation/MainActivity.kt, app/src/main/java/com/openkiosk/power/PowerStateMonitor.kt, app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt, app/src/main/java/com/openkiosk/receiver/BootReceiver.kt, app/src/main/java/com/openkiosk/receiver/KioskDeviceAdminReceiver.kt, app/src/main/java/com/openkiosk/OpenKioskApplication.kt, app/src/main/AndroidManifest.xml, app/src/main/java/com/openkiosk/domain/model/ScreenState.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt, app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt]
 verified-by: "./gradlew testDebugUnitTest (14 arquivos de teste: ls app/src/test/java/com/openkiosk/*/*.kt | wc -l = 14); no aparelho, adb logcat -s ScreenState:D KioskViewModel:D MotionDetection:D KioskWatchdog:D PowerState:D mostra cada transicao e cada decisao de sensor"
-doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#60a2ebcc
+doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#4091485e
 ---
 
 # Arquitetura — OPEN-KIOSK

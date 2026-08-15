@@ -1,6 +1,6 @@
 ---
 generated: 2026-08-15
-generated-commit: 90934e0
+generated-commit: 628b8ea
 project: open-kiosk
 scope: [app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt, app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt, app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt, app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt]
 verified-by: |
@@ -13,7 +13,7 @@ verified-by: |
   Sem aparelho, no repositorio:
     grep -rn "getSharedPreferences\|DataStore\|openFileOutput\|filesDir\|cacheDir" --include="*.kt" app/src
     grep -c 'ConfigEntity("' app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt
-doc-sig: open-kiosk/PlaylistRepository.kt@gen=3.8#e81f1bd3
+doc-sig: open-kiosk/PlaylistRepository.kt@gen=3.8#15780373
 ---
 
 # Depositos de dados — inventario
