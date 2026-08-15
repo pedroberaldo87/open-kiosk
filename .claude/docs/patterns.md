@@ -13,7 +13,7 @@ doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#7484b555
 
 - Logica que da para testar sai da classe e vira funcao pura de arquivo, `internal` ou publica, ao lado da classe que a usa. Exemplos lidos: `brightnessFor()` e `strandedInDeepSleep()` e `wakesScreenOnLaunch()` em **ScreenStateManager.kt**; `changedPixelRatio()` em **MotionDetectionAnalyzer.kt**; `isNear()` e `isApproach()` em **SensorWakeManager.kt**; `relaunchDelayMs()` e `shouldWakeOnRelaunch()` em **KioskWatchdogService.kt**. [confirmado]
 - Comentario explica POR QUE, quase sempre em portugues, e quase sempre descreve o bug que a linha evita — nao o que a linha faz. Padrao a manter em codigo novo. [confirmado]
-- Constante de calibracao de campo leva a instrucao de ajuste no proprio comentario ("knob de campo: subir se ...; baixar se ..."): `PIXEL_THRESHOLD` em **MotionDetectionAnalyzer.kt**, `MAX_PULSE_GAP_MS` e `CONTINUOUS_POLLING_MS` em **MotionDetectionManager.kt**. [confirmado]
+- Constante de calibracao de campo leva a instrucao de ajuste no proprio comentario ("knob de campo: subir se ...; baixar se ..."): `PIXEL_THRESHOLD` em **MotionDetectionAnalyzer.kt** e `CONTINUOUS_POLLING_MS` em **MotionDetectionManager.kt**. [confirmado]
 - Gerentes de longa vida sao `@Singleton` + `@Inject constructor(@ApplicationContext context)`: `ScreenStateManager`, `MotionDetectionManager`, `SensorWakeManager`. `WebViewRecoveryManager` e a excecao — instanciado a mao em **KioskViewModel.kt** (`val recoveryManager = WebViewRecoveryManager()`). [confirmado]
 - Referencia a Activity so por `WeakReference` (**ScreenStateManager.kt**, campo `activityRef`), e todo caminho que toca janela faz `activityRef?.get() ?: return`. [confirmado]
 - Toda temporizacao usa `Handler(Looper.getMainLooper())` + `Runnable` nomeado como campo, para poder `removeCallbacks` no mesmo objeto. Nao ha corrotina agendando sono/pulso/backoff. [confirmado]
@@ -45,7 +45,8 @@ doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#7484b555
   - amostragem (distancia entre os dois quadros comparados): `CONTINUOUS_POLLING_MS = 200L` em DIM, `PULSED_POLLING_MS = 200L` dentro do pulso;
   - pulso (janela vs. cegueira em SLEEP): `CAPTURE_WINDOW_MS = 2500L` de captura e `_pulseIntervalMs` de silencio, vindo da config `cameraPulseIntervalSeconds`.
   A config do menu e cadencia de PULSO, nunca de amostragem. [confirmado]
-- `enablePulsedMode(intervalMs)` respeita o valor do dono com piso de 1s (`coerceAtLeast(1_000L)`). O teto antigo engolia em silencio o que o menu oferecia. A constante `MAX_PULSE_GAP_MS = 4000L` esta declarada e NAO e referenciada por nenhum codigo (grep em app/src acha so a propria declaracao e o comentario): implementada, inativa. [confirmado]
+- `enablePulsedMode(intervalMs)` respeita o valor do dono com piso de 1s (`coerceAtLeast(1_000L)`). O teto antigo engolia em silencio o que o menu oferecia — a constante `MAX_PULSE_GAP_MS` que o
+implementava foi REMOVIDA ao deixar de ter uso. [confirmado]
 - Bind da camera e assincrono e pode ser cancelado no meio: `MotionDetectionManager` guarda um contador `generation`, incrementado por `start()` e por `stop()`; o listener aborta se `myGeneration != generation`. Codigo novo que faca bind fora desse caminho tem que repetir a guarda, senao a camera volta a rodar depois de um `stop()`. [confirmado]
 - `stop()` zera `analyzer` e `imageAnalysis`. Depois disso `updateConfig(threshold)` vira no-op silencioso — mudar a sensibilidade com a camera parada nao faz nada, e o valor entra so no proximo `start()`, que ja recebe o threshold por parametro. [confirmado]
 

@@ -237,9 +237,9 @@ sleepRunnable  → imageAnalysis.clearAnalyzer()
   economiza é a CPU, não o sensor [confirmado].
 - `enablePulsedMode()` aplica `intervalMs.coerceAtLeast(1_000L)`; o menu oferece 5, 10, 15, 20, 30
   e 60 s [confirmado, `pulseOptions` em `SettingsScreen.kt`].
-- `MAX_PULSE_GAP_MS = 4000L` está declarado e **nunca é usado**: `grep -rn "MAX_PULSE_GAP_MS"
-  app/src` devolve só a linha da declaração e a do comentário. O teto de 4 s descrito no comentário
-  não é aplicado — o intervalo escolhido pelo dono vale inteiro [confirmado por grep].
+- O intervalo escolhido pelo dono vale inteiro: a constante `MAX_PULSE_GAP_MS`, que impunha um
+  teto de 4 s sem que o comentário dissesse, foi removida [confirmado, `grep -rn
+  "MAX_PULSE_GAP_MS" app/src` não devolve nada].
 
 ---
 
@@ -423,10 +423,6 @@ SettingsDrawerContent (SettingsScreen.kt)
   nada. O endereço exibido vem da playlist; `startUrl` só aparece como reserva em
   `KioskViewModel` (`item?.url ?: config.value.startUrl`) e em `KioskScreen`
   (`currentUrl.ifBlank { config.startUrl }`) [confirmado por grep].
-- **Sem consumidor no runtime**: `cameraPollingIntervalSeconds` existe em `KioskConfig` e em
-  `ConfigRepository`, mas `grep -rn "cameraPollingIntervalSeconds" app/src` não acha nenhum leitor
-  no caminho de execução — a cadência de amostragem é a constante `CONTINUOUS_POLLING_MS` do
-  `MotionDetectionManager` [confirmado por grep].
 - Os três `Slider` (tempo até DIM, tempo até SLEEP, brilho de DIM) chamam `onUpdate` em
   `onValueChange`, ou seja, uma escrita no Room por passo do arrasto, cada uma disparando o
   `collect` inteiro [inferido — o efeito de enxurrada não foi medido].
@@ -480,11 +476,12 @@ Achados de commits e sessões antigas, conferidos contra o código lido agora:
 
 ## Pendências
 
-- [TODO: sem cobertura declarada] Trocar o intervalo de recarga automática pela gaveta não reagenda
-  o relógio (ver caminho 6). Falta confirmar no aparelho se o caso 30 min → "Desativado" realmente
-  entra em recarga contínua, e onde a correção deve morar (`WebViewRecoveryManager.startAutoRefresh`
-  chamado de novo no `collect` da config, ou guarda no repost do `Runnable`).
-- [TODO: sem cobertura declarada] `MAX_PULSE_GAP_MS` está declarado e não é usado; o comentário
-  que o acompanha descreve um teto que o código não aplica. Decidir entre aplicar ou remover.
-- [TODO: sem cobertura declarada] `cameraPollingIntervalSeconds` persiste no Room sem leitor no
-  caminho de execução e sem campo na gaveta.
+- RESOLVIDO e verificado no aparelho: trocar a recarga automática para "Desativado" com o relógio
+  já armado entrava em recarga contínua, porque o `Runnable` relia o intervalo ao se reagendar
+  (`postDelayed(this, 0)`). A guarda passou para dentro do próprio `Runnable`. Reproduzido no Fire
+  HD 8 pela gaveta (5 min → "Desativado"): o relógio disparou às 16:25:44, registrou "Auto-refresh
+  desativado durante a execucao — nao reagenda" e parou — 1 recarga no período, não um laço
+  [confirmado por `adb logcat -s WebViewRecoveryManager:D`].
+- RESOLVIDOS na mesma rodada: `MAX_PULSE_GAP_MS` (teto nunca aplicado) e
+  `cameraPollingIntervalSeconds` (persistido sem leitor) eram sobras de refatoração e saíram do
+  código [confirmado por grep].

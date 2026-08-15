@@ -333,7 +333,6 @@ internal fun relaunchDelayMs(consecutiveMisses: Int): Long =
 ```kotlin
 CAPTURE_WINDOW_MS = 2500L
 PULSED_POLLING_MS = 200L
-MAX_PULSE_GAP_MS = 4000L     // declarada; nao referenciada no corpo deste arquivo
 CONTINUOUS_POLLING_MS = 200L
 ```
 
@@ -455,12 +454,7 @@ CONTINUOUS_POLLING_MS = 200L
   `AndroidManifest.xml`, mas nenhum arquivo desta fatia adquire `WakeLock` — o commit
   2f5e2667d858924d removeu esse uso do `ScreenStateManager`. Falta varrer o resto do projeto
   antes de tirar a declaracao.
-- [TODO: verificar] `KioskConfig.cameraPollingIntervalSeconds` e persistido por
-  `ConfigRepository.updateConfig`, mas nenhum arquivo desta fatia le esse campo — a cadencia
-  de amostragem vem das constantes `CONTINUOUS_POLLING_MS` / `PULSED_POLLING_MS` em
-  `MotionDetectionManager.kt`, e o comentario do proprio arquivo diz que
-  `cameraPollingIntervalSeconds` "e cadencia de PULSO, nunca de amostragem". Confirmar se
-  algum outro arquivo consome; senao e ajuste morto na gaveta.
-- [TODO: verificar] `MAX_PULSE_GAP_MS = 4000L` esta declarada em `MotionDetectionManager.kt`
-  e nao aparece em nenhuma expressao do corpo do arquivo — constante documental ou sobra de
-  refatoracao.
+- RESOLVIDO nesta rodada: `cameraPollingIntervalSeconds` (persistido sem nenhum leitor) e
+  `MAX_PULSE_GAP_MS` (declarada e nunca referenciada) eram sobras de refatoracao e foram
+  REMOVIDOS do codigo. `grep -rn "cameraPollingIntervalSeconds\|MAX_PULSE_GAP_MS" app/src`
+  nao retorna nada. [confirmado]

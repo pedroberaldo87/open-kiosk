@@ -40,7 +40,7 @@ Chaves gravadas em `config` por `ConfigRepository.updateConfig(config: KioskConf
 ```
 activeTimeoutSeconds  dimTimeoutSeconds  dimBrightnessPercent
 wakeOnMotion  wakeOnProximity  wakeOnShake  motionSensitivity
-cameraPollingIntervalSeconds  cameraPulseIntervalSeconds
+cameraPulseIntervalSeconds
 deepSleepEnabled  deepSleepStartHour  deepSleepEndHour
 autoRefreshMinutes  lockTaskEnabled  pinEnabled  pin  startUrl
 ```

@@ -88,7 +88,6 @@ wakeOnMotion
 wakeOnProximity
 wakeOnShake
 motionSensitivity
-cameraPollingIntervalSeconds
 cameraPulseIntervalSeconds
 deepSleepEnabled
 deepSleepStartHour
@@ -186,10 +185,6 @@ Comparando as chaves que a gaveta escreve (`SettingsScreen.kt`) com as que o rep
   esta vazia (**KioskViewModel.kt**: `item?.url ?: config.value.startUrl`; **KioskScreen.kt**:
   `currentUrl.ifBlank { config.startUrl }`). Na pratica fica congelada no padrao de fabrica
   definido em **KioskConfig.kt**. [confirmado]
-- `cameraPollingIntervalSeconds` — gravada e lida pelo repositorio, mas **nenhum consumidor usa o
-  valor**: a unica mencao fora do repositorio e um comentario em **MotionDetectionManager.kt**.
-  Campo morto que ainda ocupa uma linha da tabela. [confirmado por
-  `grep -rn "cameraPollingIntervalSeconds" --include="*.kt" app/src/main`]
 - Os padroes de fabrica estao escritos **duas vezes**, com os mesmos valores: nos parametros de
   **KioskConfig.kt** e nos `?:` de **ConfigRepository.kt** :: `observeConfig`. Mudar um lado sem o
   outro faz o aplicativo se comportar de um jeito antes de alguem abrir a gaveta e de outro depois. [confirmado]

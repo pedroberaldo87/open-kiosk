@@ -1,16 +1,16 @@
 # Graph Report - open-kiosk  (2026-08-15)
 
 ## Corpus Check
-- 59 files · ~219,507 words
+- 69 files · ~232,838 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 507 nodes · 652 edges · 45 communities (38 shown, 7 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 33 edges (avg confidence: 0.8)
+- 610 nodes · 746 edges · 55 communities (46 shown, 9 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 34 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0383d046`
+- Built from commit: `ca286795`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -57,35 +57,44 @@
 - [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Community 40|Community 40]]
 - [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
+- [[_COMMUNITY_Community 51|Community 51]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `KioskViewModel` - 27 edges
 2. `ScreenStateManager` - 24 edges
-3. `Project Reference` - 15 edges
-4. `OPEN-KIOSK` - 14 edges
-5. `MotionDetectionManager` - 13 edges
-6. `PlaylistManager` - 12 edges
-7. `MainActivity` - 12 edges
-8. `WebViewRecoveryManager` - 12 edges
+3. `Deploy — como se compila, assina, testa e instala` - 17 edges
+4. `WebViewRecoveryManager` - 14 edges
+5. `OPEN-KIOSK` - 14 edges
+6. `MotionDetectionManager` - 13 edges
+7. `PlaylistManager` - 12 edges
+8. `MainActivity` - 12 edges
 9. `KioskViewModelAttachTest` - 11 edges
 10. `KioskViewModelConfigSensorsTest` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `KioskScreen()` --calls--> `OfflineScreen()`  [INFERRED]
   app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt → app/src/main/java/com/openkiosk/presentation/component/OfflineScreen.kt
-- `KioskScreen()` --calls--> `PinDialog()`  [INFERRED]
-  app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt → app/src/main/java/com/openkiosk/presentation/component/PinDialog.kt
 - `KioskScreen()` --calls--> `SettingsDrawerContent()`  [INFERRED]
   app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt → app/src/main/java/com/openkiosk/presentation/screen/SettingsScreen.kt
 - `shouldWakeOnRelaunch()` --calls--> `wakesScreenOnLaunch()`  [INFERRED]
   app/src/main/java/com/openkiosk/service/KioskWatchdogService.kt → app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt
 - `KioskScreen()` --calls--> `KioskWebView()`  [INFERRED]
   app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt → app/src/main/java/com/openkiosk/presentation/component/KioskWebView.kt
+- `KioskScreen()` --calls--> `PinDialog()`  [INFERRED]
+  app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt → app/src/main/java/com/openkiosk/presentation/component/PinDialog.kt
 
 ## Import Cycles
 - None detected.
 
-## Communities (45 total, 7 thin omitted)
+## Communities (55 total, 9 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.15
@@ -100,8 +109,8 @@ Cohesion: 0.11
 Nodes (13): Boolean, Double, ImageProxy, Long, ImageAnalysis, Int, ImageProxy, Int (+5 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (14): Boolean, String, Unit, Boolean, Context, KioskViewModel, KioskViewModel, Bundle (+6 more)
+Cohesion: 0.07
+Nodes (16): Boolean, String, Unit, String, Boolean, Context, KioskViewModel, KioskViewModel (+8 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.13
@@ -116,8 +125,8 @@ Cohesion: 0.10
 Nodes (20): Architecture, Build, Camera Motion Detection, Code of Conduct, Configuration, Contributing, Debugging, Device Owner Setup (Full Kiosk Lock) (+12 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.15
-Nodes (7): String, Boolean, Long, Runnable, PinDialog(), AutoRefreshDisabledTest, WebViewRecoveryManager
+Cohesion: 0.16
+Nodes (5): Boolean, Long, Runnable, AutoRefreshDisabledTest, WebViewRecoveryManager
 
 ### Community 8 - "Community 8"
 Cohesion: 0.17
@@ -136,8 +145,8 @@ Cohesion: 0.21
 Nodes (8): Boolean, Float, Pair, SensorEventListener, isApproach(), isNear(), SensorWakeManager, SensorWakeProximityTest
 
 ### Community 12 - "Community 12"
-Cohesion: 0.12
-Nodes (15): Banco de Dados, CI/CD, Comandos Úteis, Decisões de Arquitetura, Dependências Críticas, Estrutura de Diretórios, Gestão de Energia (State Machine), Gotchas (+7 more)
+Cohesion: 0.29
+Nodes (6): As armadilhas que mordem de verdade, Comandos rápidos, Custom Rules, Documentação, Knowledge Graph (graphify), OPEN-KIOSK
 
 ### Community 13 - "Community 13"
 Cohesion: 0.20
@@ -227,25 +236,53 @@ Nodes (3): generated_ts, tree_hash, verdicts
 Cohesion: 0.50
 Nodes (3): generated_ts, tree_hash, verdicts
 
+### Community 45 - "Community 45"
+Cohesion: 0.09
+Nodes (22): 1. Camadas, 2. Injecao de dependencia (Hilt), 3. Maquina de estado de tela, 4. Quem chama quem, 5.1 Config real vs. valor de fabrica (`realConfig` nulo), 5.2 Trava de quiosque: dono do aparelho com queda para imersivo, 5.3 O vigia: servico em primeiro plano com recuo progressivo, 5.4 Camera: continua na tomada, pulsada na bateria (+14 more)
+
+### Community 46 - "Community 46"
+Cohesion: 0.10
+Nodes (20): 1. Banco SQLite do Room — `openkiosk.db`, 2. Preferencias do Android — `open_kiosk_prefs`, 3. Armazenamento do navegador embutido, Buracos achados na comparacao mecanica interface x banco, Cobertura de teste, Conversao entidade <-> dominio, Depositos de dados — inventario, Estado inicial (+12 more)
+
+### Community 47 - "Community 47"
+Cohesion: 0.11
+Nodes (17): Assinar o release, Compilar, Correcoes a fazer na documentacao existente, Deploy — como se compila, assina, testa e instala, Device owner (caminho do README, so em aparelho limpo), Diagnostico no aparelho, Estado da verificacao nesta rodada, Ferramental exigido (+9 more)
+
+### Community 48 - "Community 48"
+Cohesion: 0.13
+Nodes (14): 1 · Acordar por movimento, 2 · Ciclo de sono ACTIVE → DIM → SLEEP (→ DEEP_SLEEP), 3 · Relance quando algo cobre o aplicativo, 4 · Troca de energia (tomada ↔ bateria), 5 · Arranque frio, 6 · Recuperação da página, 7 · Mudança de ajuste, Caminhos de execução (+6 more)
+
+### Community 49 - "Community 49"
+Cohesion: 0.15
+Nodes (12): 1. Banco Room `openkiosk.db` — ajustes e lista de endereços, 2. SharedPreferences `open_kiosk_prefs` — estado de tela e idioma, 3. Dados do site exibido (localStorage / cookies do WebView), 4. Provisionamento do aparelho (mora fora do aplicativo), 5. Chave de assinatura de release, Achados históricos reconciliados contra o código desta fatia, Durabilidade — onde o estado mora e o que acontece se o tablet sumir, O que existe declarado e não é usado (+4 more)
+
+### Community 50 - "Community 50"
+Cohesion: 0.18
+Nodes (10): Armadilhas (gotchas) que ja causaram bug, Camera e movimento, Ciclo de sono / estado de tela, Convencoes e armadilhas (patterns), Convencoes que o codigo segue de fato, Nao testado hoje (armadilha por ausencia), PIN, Sensores (proximidade / chacoalhada) (+2 more)
+
+### Community 51 - "Community 51"
+Cohesion: 0.50
+Nodes (3): distilled_hashes, last_commit, mined_sessions
+
 ## Knowledge Gaps
-- **169 isolated node(s):** `tree_hash`, `generated_ts`, `verdicts`, `tree_hash`, `generated_ts` (+164 more)
+- **241 isolated node(s):** `mined_sessions`, `last_commit`, `distilled_hashes`, `tree_hash`, `generated_ts` (+236 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `KioskScreen()` connect `Community 3` to `Community 5`, `Community 7`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `KioskScreen()` connect `Community 3` to `Community 5`?**
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **Why does `KioskWebView()` connect `Community 3` to `Community 4`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `KioskViewModel` connect `Community 4` to `Community 16`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
-- **What connects `tree_hash`, `generated_ts`, `verdicts` to the rest of the system?**
-  _169 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Are the 3 inferred relationships involving `WebViewRecoveryManager` (e.g. with `.`desativar durante a execucao para o relogio em vez de reagendar com zero`()` and `.`intervalo positivo agenda recarga`()`) actually correct?**
+  _`WebViewRecoveryManager` has 3 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `mined_sessions`, `last_commit`, `distilled_hashes` to the rest of the system?**
+  _241 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.14772727272727273 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.08817204301075268 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.10837438423645321 - nodes in this community are weakly interconnected._
