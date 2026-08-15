@@ -20,15 +20,8 @@ private const val TAG = "MotionDetection"
 // primeira vira referencia e as demais sao comparadas (~12 comparacoes por pulso).
 private const val CAPTURE_WINDOW_MS = 2500L
 private const val PULSED_POLLING_MS = 200L
-// teto do intervalo CEGO entre pulsos. Com CAPTURE_WINDOW_MS=2500 o ciclo enxerga ~38% do tempo
-// (2500 de cada 6500ms), entao quem atravessa em ~2s cai dentro de uma janela na maioria das
-// passagens. A camera fica ligada entre pulsos de qualquer jeito (nao ha unbind), entao gap maior
-// nao economiza energia — so cega. cameraPulseIntervalSeconds ainda vale para valores menores.
-// knob de campo: subir se a CPU do tablet reclamar; baixar se pessoa rapida escapar.
-private const val MAX_PULSE_GAP_MS = 4000L
 // cadencia de AMOSTRAGEM na analise continua (DIM): distancia entre os dois quadros comparados.
-// Tem que ser curta o bastante para pegar alguem atravessando em 1-2s — a config
-// cameraPollingIntervalSeconds (5s) e cadencia de PULSO, nunca de amostragem.
+// Tem que ser curta o bastante para pegar alguem atravessando em 1-2s.
 // knob de campo: subir se a CPU do tablet reclamar; baixar se pessoa rapida escapar.
 private const val CONTINUOUS_POLLING_MS = 200L
 

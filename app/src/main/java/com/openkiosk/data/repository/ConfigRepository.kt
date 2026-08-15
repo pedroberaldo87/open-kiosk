@@ -25,7 +25,6 @@ class ConfigRepository @Inject constructor(
             motionSensitivity = map["motionSensitivity"]?.let {
                 try { MotionSensitivity.valueOf(it) } catch (_: Exception) { MotionSensitivity.MEDIUM }
             } ?: MotionSensitivity.MEDIUM,
-            cameraPollingIntervalSeconds = map["cameraPollingIntervalSeconds"]?.toIntOrNull() ?: 5,
             cameraPulseIntervalSeconds = map["cameraPulseIntervalSeconds"]?.toIntOrNull() ?: 10,
             deepSleepEnabled = map["deepSleepEnabled"]?.toBooleanStrictOrNull() ?: false,
             deepSleepStartHour = map["deepSleepStartHour"]?.toIntOrNull() ?: 22,
@@ -51,7 +50,6 @@ class ConfigRepository @Inject constructor(
             ConfigEntity("wakeOnProximity", config.wakeOnProximity.toString()),
             ConfigEntity("wakeOnShake", config.wakeOnShake.toString()),
             ConfigEntity("motionSensitivity", config.motionSensitivity.name),
-            ConfigEntity("cameraPollingIntervalSeconds", config.cameraPollingIntervalSeconds.toString()),
             ConfigEntity("cameraPulseIntervalSeconds", config.cameraPulseIntervalSeconds.toString()),
             ConfigEntity("deepSleepEnabled", config.deepSleepEnabled.toString()),
             ConfigEntity("deepSleepStartHour", config.deepSleepStartHour.toString()),

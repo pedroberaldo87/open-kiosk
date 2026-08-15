@@ -34,6 +34,13 @@ class WebViewRecoveryManager {
             override fun run() {
                 Log.d(TAG, "Auto-refresh triggered")
                 onRefresh()
+                // O intervalo pode ter virado 0 ("Desativado") pela gaveta DEPOIS deste
+                // relogio ja estar armado: reagendar com 0 seria recarga em laco continuo.
+                if (autoRefreshIntervalMs <= 0L) {
+                    Log.d(TAG, "Auto-refresh desativado durante a execucao — nao reagenda")
+                    autoRefreshRunnable = null
+                    return
+                }
                 handler.postDelayed(this, autoRefreshIntervalMs)
             }
         }
@@ -65,6 +72,15 @@ class WebViewRecoveryManager {
 
     /** Visível para o teste do "desativado": nada agendado quando o intervalo é 0. */
     fun isAutoRefreshScheduled(): Boolean = autoRefreshRunnable != null
+
+    /**
+     * Dispara o relógio de recarga na hora, sem esperar o Handler — é o único jeito de o teste
+     * exercitar o caminho "intervalo virou 0 com o relógio já armado" numa máquina virtual Java,
+     * onde o Handler do Android não roda.
+     */
+    fun runPendingRefreshForTest() {
+        autoRefreshRunnable?.run()
+    }
 
     fun stop() {
         stopAutoRefresh()

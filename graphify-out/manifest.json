@@ -1,0 +1,337 @@
+{
+  ".claude/intent/audit-1786818422.json": {
+    "mtime": 1786819103.3117883,
+    "ast_hash": "4b1d4bcf188924312cc9800dc7577f8e",
+    "semantic_hash": ""
+  },
+  ".claude/intent/audit-1786818487.json": {
+    "mtime": 1786819103.3116803,
+    "ast_hash": "4b1d4bcf188924312cc9800dc7577f8e",
+    "semantic_hash": ""
+  },
+  "app/build.gradle.kts": {
+    "mtime": 1786763482.732602,
+    "ast_hash": "d52d6653e314229ce8e29ba81bc9460b",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/OpenKioskApplication.kt": {
+    "mtime": 1786761791.2926352,
+    "ast_hash": "46d96f8486bb7a5da03f5072bc85623a",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/local/AppDatabase.kt": {
+    "mtime": 1786761791.2927547,
+    "ast_hash": "c73ebdaf5db4d9ace812e6f2244b797e",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt": {
+    "mtime": 1786817412.9306135,
+    "ast_hash": "00cc4233a4bd16b84c2519e5cef91b5b",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt": {
+    "mtime": 1786761791.2928393,
+    "ast_hash": "52c227f18800b37e8a94664135eabe0b",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt": {
+    "mtime": 1786761791.2928848,
+    "ast_hash": "7c0d5a6b17a05a31123db944d863fba3",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt": {
+    "mtime": 1786761791.2929628,
+    "ast_hash": "f38073378a0bdf1bc1057ce853738dcf",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt": {
+    "mtime": 1786761791.293013,
+    "ast_hash": "3476e7e6cee1a7cf3fd4c888fc1015f4",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt": {
+    "mtime": 1786761791.293101,
+    "ast_hash": "8e0cf99eceb498ff55191f92d2f469fe",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt": {
+    "mtime": 1786761791.293155,
+    "ast_hash": "75a8cdf25bdccc5227d98a8075addb0b",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/di/DatabaseModule.kt": {
+    "mtime": 1786761791.2932281,
+    "ast_hash": "477603cd0b3243d90dba3e50d7c911ca",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/domain/PlaylistManager.kt": {
+    "mtime": 1786761791.2933242,
+    "ast_hash": "4520e635d82b124050b6887cdd061f75",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt": {
+    "mtime": 1786761791.2934434,
+    "ast_hash": "fbf3902541a4faa69245ba21a83a8a76",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/domain/model/PlaylistItem.kt": {
+    "mtime": 1786761791.2935,
+    "ast_hash": "1467ef151d16884c992e83a8c403005b",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/domain/model/ScreenState.kt": {
+    "mtime": 1786761791.2935514,
+    "ast_hash": "d964e3a1306960865df8adc05cf1a34e",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/kiosk/KioskLockManager.kt": {
+    "mtime": 1786766155.2621427,
+    "ast_hash": "92f12e2205f5b48a4f0e7ca52318c5c1",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/power/PowerStateMonitor.kt": {
+    "mtime": 1786817590.1689937,
+    "ast_hash": "e613c2ce426d16711f78cf4c3c229fe4",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/MainActivity.kt": {
+    "mtime": 1786817424.2049415,
+    "ast_hash": "5a4298d2b31a7b12d54262881983c37e",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/component/KioskWebView.kt": {
+    "mtime": 1786765324.684567,
+    "ast_hash": "bf5c4fb87d8b1f848fcb2d102a5606a0",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/component/OfflineScreen.kt": {
+    "mtime": 1786761791.2939284,
+    "ast_hash": "55c43164ffea90ccb1123adf7c55a142",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/component/PinDialog.kt": {
+    "mtime": 1786761791.2939851,
+    "ast_hash": "653723c8cb39a1a9c009909fca92633f",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt": {
+    "mtime": 1786763351.0117962,
+    "ast_hash": "72e843516a27fb4029dadaaf438225ac",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/screen/SettingsScreen.kt": {
+    "mtime": 1786817424.2059407,
+    "ast_hash": "7a430c3f6fe48b15dbd5c2ef337b5f69",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/viewmodel/KioskViewModel.kt": {
+    "mtime": 1786817575.9532514,
+    "ast_hash": "0ed2175bbbe888335d9755ae52d29acf",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/presentation/viewmodel/SettingsViewModel.kt": {
+    "mtime": 1786761791.29564,
+    "ast_hash": "e9a69233a21a2607aecfacc944cf86d9",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/receiver/BootReceiver.kt": {
+    "mtime": 1786766105.2708538,
+    "ast_hash": "115ddc794da67fbca33b9ee7517e2cfe",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/receiver/KioskDeviceAdminReceiver.kt": {
+    "mtime": 1786761791.295786,
+    "ast_hash": "775ad12a38109ba42cddaf93ac259094",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/sensors/MotionDetectionAnalyzer.kt": {
+    "mtime": 1786817610.2720463,
+    "ast_hash": "6c6b739097b124574a8c170d173b3ce7",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt": {
+    "mtime": 1786817580.2098985,
+    "ast_hash": "31472739ab49db9ca5fbf18559aa57c0",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/sensors/SensorWakeManager.kt": {
+    "mtime": 1786794457.4266593,
+    "ast_hash": "ba10b7e3f387ace58cd5209142f6ed08",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/service/KioskWatchdogService.kt": {
+    "mtime": 1786817599.0574148,
+    "ast_hash": "d709f57690e29603c23470d6e9803e26",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt": {
+    "mtime": 1786817564.242815,
+    "ast_hash": "0a1a2eefed3e5b60a7ce2bb83c435faa",
+    "semantic_hash": ""
+  },
+  "app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt": {
+    "mtime": 1786817636.1505132,
+    "ast_hash": "24b1a13bf4e62400e89dbbe4269a86c9",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/presentation/KioskViewModelAttachTest.kt": {
+    "mtime": 1786794620.9824576,
+    "ast_hash": "78df8d12a57401e3af1dce977ae2a287",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/presentation/KioskViewModelConfigSensorsTest.kt": {
+    "mtime": 1786794671.0899312,
+    "ast_hash": "35bf22dd99fff0974c7305f343f2cf41",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/presentation/KioskViewModelPlaceholderConfigTest.kt": {
+    "mtime": 1786794621.0191457,
+    "ast_hash": "d3417cf335b564ae935c5997ae975d86",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/presentation/KioskViewModelReattachSensorsTest.kt": {
+    "mtime": 1786794621.036285,
+    "ast_hash": "175ecd158b814f046f0fdcf2909115b5",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/presentation/KioskViewModelSensorOffTest.kt": {
+    "mtime": 1786817624.6164973,
+    "ast_hash": "17db2837f718a17e9d71a9fc947cacbe",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerLightTest.kt": {
+    "mtime": 1786764706.292018,
+    "ast_hash": "c99b72ee211a324e6866461e6db86124",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerPulseWarmupTest.kt": {
+    "mtime": 1786765110.8558505,
+    "ast_hash": "c7f12e2bb462f3592fa0d3a1299c4753",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerResetTest.kt": {
+    "mtime": 1786763803.2690833,
+    "ast_hash": "c89a8424f4efb7079a0a392ddcdc4a24",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/sensors/SensorWakeProximityTest.kt": {
+    "mtime": 1786768777.9416523,
+    "ast_hash": "7d12f3e23308633792a674265e7c7aab",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/service/KioskWatchdogRelaunchTest.kt": {
+    "mtime": 1786770611.2961311,
+    "ast_hash": "1ec1b31fabc0f53967212ef70abe0732",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/service/WatchdogBackoffTest.kt": {
+    "mtime": 1786794684.3810513,
+    "ast_hash": "d7ef925b2b364e612d24c47c6e6130d4",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/sleep/BrightnessForStateTest.kt": {
+    "mtime": 1786794679.8183196,
+    "ast_hash": "b01e0cc332a5d32addbb1526f928ec38",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/sleep/ScreenStateDeepSleepExitTest.kt": {
+    "mtime": 1786770733.7788253,
+    "ast_hash": "ac36bdf64a4124579ba563b7631a1276",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/webview/AutoRefreshDisabledTest.kt": {
+    "mtime": 1786817631.6763365,
+    "ast_hash": "36017f0d0777cea4d85a287a5393cddc",
+    "semantic_hash": ""
+  },
+  "build.gradle.kts": {
+    "mtime": 1786761791.2968223,
+    "ast_hash": "7c77e4fa4061c34ad06457febe70f75f",
+    "semantic_hash": ""
+  },
+  "gradlew": {
+    "mtime": 1786761791.2975402,
+    "ast_hash": "b6511d4bd6d6bae66e148d16105a5e6b",
+    "semantic_hash": ""
+  },
+  "settings.gradle.kts": {
+    "mtime": 1786761791.3131115,
+    "ast_hash": "8a684a4f8a09acab04207ef0128ebc1d",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1786818083.0939674,
+    "ast_hash": "6778dd635f85892b76d0daf5bb4ebe7b",
+    "semantic_hash": ""
+  },
+  ".github/ISSUE_TEMPLATE/bug_report.yml": {
+    "mtime": 1786761791.2915282,
+    "ast_hash": "ed2bd94997768fa427cd753b7b80b863",
+    "semantic_hash": ""
+  },
+  ".github/ISSUE_TEMPLATE/feature_request.yml": {
+    "mtime": 1786761791.2916045,
+    "ast_hash": "9c1245de5d3fca4d5755dfd688b86a15",
+    "semantic_hash": ""
+  },
+  ".github/PULL_REQUEST_TEMPLATE.md": {
+    "mtime": 1786761791.2916687,
+    "ast_hash": "ecc295491c80f6091ee4c10dccc4df54",
+    "semantic_hash": ""
+  },
+  ".github/workflows/build.yml": {
+    "mtime": 1786761791.2917552,
+    "ast_hash": "109e91bef85a831c238fabcb271c9933",
+    "semantic_hash": ""
+  },
+  "CHANGELOG.md": {
+    "mtime": 1786761791.2918584,
+    "ast_hash": "7c591179bbd0700ff3d81dc201124e85",
+    "semantic_hash": ""
+  },
+  "CODE_OF_CONDUCT.md": {
+    "mtime": 1786761791.2919068,
+    "ast_hash": "052b29c4ffe6a3088ebe4a7d0939f29c",
+    "semantic_hash": ""
+  },
+  "CONTRIBUTING.md": {
+    "mtime": 1786761791.2919579,
+    "ast_hash": "9017909e79ee35c940451ec4b93ee358",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1786761791.2921584,
+    "ast_hash": "6cc9d6b73dea73b39dc927836b38a6e4",
+    "semantic_hash": ""
+  },
+  "SECURITY.md": {
+    "mtime": 1786761791.2922192,
+    "ast_hash": "44fbf5006b7fc0f432b9d0a7ecd0adbc",
+    "semantic_hash": ""
+  },
+  "screenshots/daily-screen-alldone.png": {
+    "mtime": 1786761791.2983375,
+    "ast_hash": "4643045796e860e0d6f7768c513257b0",
+    "semantic_hash": ""
+  },
+  "screenshots/daily-screen-checklist.png": {
+    "mtime": 1786761791.3037243,
+    "ast_hash": "94f4168514320fcf0b2362da7816cdeb",
+    "semantic_hash": ""
+  },
+  "screenshots/daily-screen-progress.png": {
+    "mtime": 1786761791.3088782,
+    "ast_hash": "5594a68f5737e6fd31ffa0fba6bf4bfb",
+    "semantic_hash": ""
+  },
+  "screenshots/settings-kiosk.png": {
+    "mtime": 1786761791.3099442,
+    "ast_hash": "8b344e571e8afedaa53cb978f77e86d3",
+    "semantic_hash": ""
+  },
+  "screenshots/settings-sensors.png": {
+    "mtime": 1786761791.3129938,
+    "ast_hash": "41c68fd6f205806d265787766ffe225f",
+    "semantic_hash": ""
+  }
+}

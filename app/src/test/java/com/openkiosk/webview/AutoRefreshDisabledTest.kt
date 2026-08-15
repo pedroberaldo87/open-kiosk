@@ -22,6 +22,21 @@ class AutoRefreshDisabledTest {
     }
 
     @Test
+    fun `desativar durante a execucao para o relogio em vez de reagendar com zero`() {
+        val manager = WebViewRecoveryManager()
+        manager.autoRefreshIntervalMs = 60_000L
+        manager.startAutoRefresh { }
+        assertEquals(true, manager.isAutoRefreshScheduled())
+
+        // O dono troca para "Desativado" com o relogio JA armado.
+        manager.autoRefreshIntervalMs = 0L
+        manager.runPendingRefreshForTest()
+
+        // Sem a guarda dentro do proprio runnable, ele se reporia com atraso 0 (laco continuo).
+        assertEquals(false, manager.isAutoRefreshScheduled())
+    }
+
+    @Test
     fun `intervalo positivo agenda recarga`() {
         val manager = WebViewRecoveryManager()
         manager.autoRefreshIntervalMs = 60_000L

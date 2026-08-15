@@ -11,7 +11,6 @@ data class KioskConfig(
     val wakeOnProximity: Boolean = true,
     val wakeOnShake: Boolean = true,
     val motionSensitivity: MotionSensitivity = MotionSensitivity.MEDIUM,
-    val cameraPollingIntervalSeconds: Int = 5,
     val cameraPulseIntervalSeconds: Int = 10,
 
     // Deep Sleep — scheduled time range, touch-only wake, all sensors off
