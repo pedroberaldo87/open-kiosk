@@ -46,6 +46,14 @@ internal fun brightnessFor(state: ScreenState, dimBrightness: Float): Float = wh
 fun strandedInDeepSleep(deepSleepEnabled: Boolean, state: ScreenState): Boolean =
     !deepSleepEnabled && state == ScreenState.DEEP_SLEEP
 
+/**
+ * Na volta da janela só solta com a agenda REAL: no arranque frio a activity anexa antes do
+ * banco responder, e o padrão (agenda desligada) acenderia o painel de madrugada. Se a config
+ * chegar depois, quem solta é configure(), que já vê a janela anexada.
+ */
+fun releaseStrandedOnAttach(configured: Boolean, deepSleepEnabled: Boolean, state: ScreenState): Boolean =
+    configured && strandedInDeepSleep(deepSleepEnabled, state)
+
 @Singleton
 class ScreenStateManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -67,6 +75,7 @@ class ScreenStateManager @Inject constructor(
     private var dimTimeoutMs: Long = 60_000L
     private var dimBrightness: Float = 0.1f
     private var deepSleepEnabled: Boolean = false
+    private var configured = false
     private var deepSleepStartHour: Int = 22
     private var deepSleepEndHour: Int = 6
 
@@ -102,6 +111,7 @@ class ScreenStateManager @Inject constructor(
         this.dimTimeoutMs = dimTimeoutMs
         this.dimBrightness = dimBrightness.coerceIn(0.01f, 1.0f)
         this.deepSleepEnabled = deepSleepEnabled
+        configured = true
         this.deepSleepStartHour = deepSleepStartHour
         this.deepSleepEndHour = deepSleepEndHour
 
@@ -130,7 +140,7 @@ class ScreenStateManager @Inject constructor(
         applyBrightness(brightnessFor(_screenState.value))
         // Sono profundo preso sem agenda ligada: a soltura ficou esperando a janela voltar
         // (configure() nao pode solta-la destacada, senao grava estado sem painel).
-        if (strandedInDeepSleep(deepSleepEnabled, _screenState.value)) {
+        if (releaseStrandedOnAttach(configured, deepSleepEnabled, _screenState.value)) {
             Log.d(TAG, "Deep sleep preso e activity de volta — soltando a tela")
             onUserActivity()
         }

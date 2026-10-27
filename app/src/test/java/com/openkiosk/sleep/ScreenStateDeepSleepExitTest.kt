@@ -28,4 +28,12 @@ class ScreenStateDeepSleepExitTest {
         assertFalse(strandedInDeepSleep(deepSleepEnabled = false, state = ScreenState.DIM))
         assertFalse(strandedInDeepSleep(deepSleepEnabled = false, state = ScreenState.ACTIVE))
     }
+
+    @Test
+    fun `arranque frio antes da config real nao acende o painel de madrugada`() {
+        // o padrao (agenda desligada) ainda nao e a config do dono: soltar aqui acendia a tela
+        assertFalse(releaseStrandedOnAttach(configured = false, deepSleepEnabled = false, state = ScreenState.DEEP_SLEEP))
+        assertTrue(releaseStrandedOnAttach(configured = true, deepSleepEnabled = false, state = ScreenState.DEEP_SLEEP))
+        assertFalse(releaseStrandedOnAttach(configured = true, deepSleepEnabled = true, state = ScreenState.DEEP_SLEEP))
+    }
 }

@@ -151,6 +151,55 @@ adb shell cmd package resolve-activity -c android.intent.category.HOME
 adb shell dumpsys package com.openkiosk | grep -i SYSTEM_ALERT_WINDOW
 ```
 
+- No Fire OS 8.3.3.8 o terceiro comando responde `Success` e **nao pega**: `resolve-activity HOME` segue `com.amazon.firelauncher` e o botao Home abre a tela da Amazon; `cmd role add-role-holder android.app.role.HOME com.openkiosk 0` tambem nao. Quem traz o quiosque de volta e o vigia, em ~6 s. [confirmado em 2026-10-26, no aparelho]
+
+## Limpeza da Amazon por cabo (plano 2026-10-26-fire-limpeza)
+
+Sem root na 8.3.3.8 sobram ajustes e desligar app comum. Antes de tudo, fotografar o estado com o desfazer de cada item: `.claude/fire-estado.sh > .claude/fire-estado-AAAA-MM-DD.md` (rodar de novo e dar `diff` mostra o que a Amazon religou). [confirmado]
+
+```bash
+# ajustes que SOBREVIVEM ao reinicio (desfazer: o valor entre parenteses)
+adb shell settings put secure search_on_lockscreen_settings 0     # (1)
+adb shell settings put secure screensaver_enabled 0               # (1) protetor de tela da Amazon
+adb shell settings put secure screensaver_activate_on_sleep 0     # (1)
+adb shell settings put secure screensaver_activate_on_dock 0      # (1) entrava com o tablet carregando
+adb shell settings put secure limit_ad_tracking 1                 # (0)
+adb shell settings put secure amz_limit_ad_tracking 1             # (0)
+adb shell settings put secure non_amz_limit_ad_tracking 1         # (0)
+adb shell settings put secure USAGE_METRICS_UPLOAD_ENABLED 0      # (1)
+adb shell settings put secure usage_metrics_marketing_enabled 0   # (1)
+
+# apps que o quiosque nao usa, sem pm clear (desfazer: adb shell pm enable <pacote>)
+for p in com.amazon.dee.app com.amazon.afe.app com.amazon.tablet.voiceassistant com.amazon.mp3 \
+         com.amazon.avod com.amazon.imdb.tv.mobile.app com.amazon.kindle com.audible.application.kindle \
+         com.amazon.photos com.amazon.weather com.kingsoft.office.amz com.amazon.windowshop \
+         com.amazon.cloud9 com.android.email com.amazon.hybridadidservice com.amazon.venezia; do
+  adb shell pm disable-user --user 0 "$p"
+done
+```
+
+- Os 16 desligaram sem recusa de pacote protegido e o quiosque voltou sozinho em 16-57 s em 3 reinicios seguidos. [confirmado em 2026-10-26]
+- **Nao pegam por adb**: `global LOCKSCREEN_AD_ENABLED 0` e `global location_global_kill_switch 1` aplicam, mas voltam para `1` e `0` em todo reinicio (medido em 2 reinicios). O historico de `dumpsys settings` mostra quem reescreve: `pkg:com.amazon.kindle.kso` (o pacote de ofertas, protegido: nem `pm disable-user` de componente nem `pm suspend` o seguram no boot). [confirmado em 2026-10-26]
+- **O que segura o anuncio**: o vigia do app (`KioskWatchdogService`) observa `LOCKSCREEN_AD_ENABLED` e devolve `0` no instante em que o pacote de ofertas o religa. Exige a permissao concedida por cabo — sem ela o vigia so loga o comando:
+
+```bash
+adb shell pm grant com.openkiosk android.permission.WRITE_SECURE_SETTINGS
+# conferir: o ultimo gravador tem que ser o quiosque
+adb shell dumpsys settings | grep name:LOCKSCREEN_AD_ENABLED   # pkg:com.openkiosk value:0
+```
+
+- **DNS que derruba os servidores de anuncio** (desfazer: `settings put global private_dns_mode off`). `aax-*.amazon-adsystem.com`, `s.amazon-adsystem.com` e `aan.amazon.com` — endereços extraidos do APK do pacote de ofertas — passam a resolver `127.0.0.1`; a pagina, o clima e as fontes resolvem normal. Sobrevive ao reinicio. [confirmado em 2026-10-27]
+
+```bash
+adb shell settings put global private_dns_specifier dns.adguard-dns.com
+adb shell settings put global private_dns_mode hostname
+```
+
+- **Janela de "armazenamento cheio" da Amazon** (abriu por cima do quiosque com o disco a 98%, oferecendo cartao SD; o mesmo pacote arquiva sozinho app que nao e da Amazon): `adb shell pm disable-user --user 0 com.amazon.storagemanager` (desfazer: `pm enable`). [confirmado em 2026-10-27]
+- **Recarga automatica em "Desativado" na gaveta.** O motor de paginas do Fire (WebView 148) deixa ~0,3 MB de memoria de video presos a cada carregamento desta pagina, e so reiniciar o processo devolve; a recarga de 5 min chegou a 974 MB em 62 dias. A pagina do DAILY-SCREEN ja se atualiza sozinha. Para o que sobra (wi-fi voltando, erro), o vigia reinicia o processo com a tela apagada quando a memoria de video passa de 300 MB. [confirmado em 2026-10-27]
+- **Nao mexer**: `parentalcontrols`, `pm`, `appverification`, `dcp`, `platform`, `client.metrics`, `tcomm`, `device.sync` (a lista ampla com eles fez um Fire 7 2022 reiniciar em loop, Fire-Tools #19), `otter.oobe` (quebra data e hora), `webview.chromium` (desenha a pagina), `tahoe` (depende do administrador do aparelho). [relatado]
+- Pendente do dono: tirar o tablet da conta Amazon (com conta logada, a Amazon pode religar o que foi desligado). [pendente]
+
 ## Device owner (caminho do README, so em aparelho limpo)
 
 ```bash

@@ -1,0 +1,333 @@
+{
+  "id": "2026-10-26-fire-limpeza",
+  "title": "Limpar o Fire HD 8 Plus do quiosque: sem propaganda, sem bloat da Amazon, sem incômodo",
+  "requisitos": [
+    {
+      "id": "R-1",
+      "titulo": "Sem propaganda na tela do quiosque",
+      "ca": "depois do reinício, LOCKSCREEN_AD_ENABLED=0 e screensaver_enabled=0 lidos no tablet, e 48 h sem propaganda vista pelo dono nem em print"
+    },
+    {
+      "id": "R-2",
+      "titulo": "Rastreio e coleta da Amazon desligados",
+      "ca": "depois do reinício, as 6 chaves de rastreio/coleta/localização lidas no tablet com o valor de privacidade"
+    },
+    {
+      "id": "R-3",
+      "titulo": "Apps Amazon que o quiosque não usa desligados",
+      "ca": "cada pacote da lista aparece em 'pm list packages -d' ou tem o erro de pacote protegido anotado; nenhum 'pm clear' rodado"
+    },
+    {
+      "id": "R-4",
+      "titulo": "O quiosque sobrevive a tudo",
+      "ca": "depois de cada reinício, o quiosque volta à frente sozinho em até 3 min (mResumedActivity com.openkiosk) e o print mostra a página"
+    },
+    {
+      "id": "R-5",
+      "titulo": "Anúncio barrado pela rede",
+      "ca": "DNS privado ativo com o provedor escolhido, lido em private_dns_mode/specifier, e a página segue carregando"
+    },
+    {
+      "id": "R-6",
+      "titulo": "Tudo tem volta",
+      "ca": "arquivo com o valor original de cada chave, os pacotes desligados e o comando de desfazer de cada passo, mais a receita no doc de publicação"
+    }
+  ],
+  "decidido": [
+    {
+      "escolha": "Desligar com 'pm disable-user', nunca 'pm clear' nem desinstalar",
+      "criterio": "o script do Fire-Tools roda 'pm clear', que apaga os dados de cada app sem volta; desligar se desfaz com 'pm enable'"
+    },
+    {
+      "escolha": "Desligar a localização do sistema",
+      "criterio": "o clima da página usa latitude/longitude do servidor (DAILY-SCREEN weather.js:51-57); o manifesto do open-kiosk não pede LOCATION"
+    },
+    {
+      "escolha": "Amazon Kids (com.amazon.tahoe) fica ligado",
+      "criterio": "o administrador do aparelho é com.amazon.parentalcontrols (dumpsys device_policy) e o Kids depende dele"
+    },
+    {
+      "escolha": "Loja da Amazon desligada só depois, isolada",
+      "criterio": "o motor da página é atualizado pelo pacote do sistema (installerPackageName=com.amazon.device.software.ota), não pela loja"
+    }
+  ],
+  "phases": [
+    {
+      "id": "F0",
+      "title": "Fotografar o estado de hoje",
+      "detail": [
+        "🔧 Como: um script lê 'settings get' das 14 chaves, 'pm list packages -d', o Home, o fuso e as contas",
+        "global: LOCKSCREEN_AD_ENABLED, location_global_kill_switch, private_dns_mode, private_dns_specifier, heads_up_notifications_enabled",
+        "secure: search_on_lockscreen_settings, screensaver_enabled, screensaver_activate_on_sleep, screensaver_activate_on_dock",
+        "secure: limit_ad_tracking, amz_limit_ad_tracking, non_amz_limit_ad_tracking, USAGE_METRICS_UPLOAD_ENABLED, usage_metrics_marketing_enabled",
+        "Também: stay_on_while_plugged_in, appops SYSTEM_ALERT_WINDOW do quiosque e getprop persist.sys.timezone",
+        "📁 Toca em: .claude/fire-estado-2026-10-26.md"
+      ],
+      "items": [
+        {
+          "id": "F0.1",
+          "title": "Salvar o estado atual num arquivo de reversão",
+          "requisito": "R-6",
+          "desc": "As 14 chaves, apps desligados, Home, fuso e contas lidos do tablet, com o desfazer ao lado",
+          "pronto": "o script, rodado contra o tablet, gera o arquivo com as 14 chaves do detalhe, o fuso e a saída de 'pm list packages -d'",
+          "status": "done",
+          "evidence": "$ .claude/fire-estado.sh > .claude/fire-estado-2026-10-26.md · 15 chaves com desfazer · 0 apps desligados · Home=com.amazon.firelauncher · fuso America/Sao_Paulo",
+          "done_at": "2026-10-26T19:22:57"
+        }
+      ]
+    },
+    {
+      "id": "F1",
+      "title": "Ajustes escondidos do sistema",
+      "detail": [
+        "🔧 Como: 'adb shell settings put' chave a chave; desfazer é o valor original da F0.1",
+        "💡 Por quê: na 8.3.3.8 o ajuste é o que sobra sem root (XDA Fire Toolbox pág. 851)",
+        "Valores de hoje, lidos no tablet: LOCKSCREEN_AD_ENABLED=1, screensaver_enabled=1, limit_ad_tracking=0, USAGE_METRICS_UPLOAD_ENABLED=1"
+      ],
+      "items": [
+        {
+          "id": "F1.1",
+          "title": "Desligar o anúncio e a busca da tela de bloqueio",
+          "requisito": "R-1",
+          "desc": "global LOCKSCREEN_AD_ENABLED 1→0 e secure search_on_lockscreen_settings 1→0",
+          "pronto": "'settings get' no tablet devolve 0 nas duas chaves",
+          "status": "done",
+          "evidence": "$ adb reboot 00:44 → settings get global LOCKSCREEN_AD_ENABLED → 0 · dumpsys settings → pkg:com.openkiosk value:0 · LockscreenAdTest 2/2",
+          "done_at": "2026-10-27T00:46:21",
+          "decidido": {
+            "escolha": "o vigia do app devolve LOCKSCREEN_AD_ENABLED a 0 quando o kso o religa",
+            "criterio": "dumpsys settings mostra pkg:com.amazon.kindle.kso reescrevendo no boot; kso é protegido contra disable e suspend"
+          }
+        },
+        {
+          "id": "F1.2",
+          "title": "Desligar o protetor de tela da Amazon",
+          "requisito": "R-1",
+          "desc": "secure screensaver_enabled, screensaver_activate_on_sleep e screensaver_activate_on_dock de 1 para 0",
+          "pronto": "'settings get' no tablet devolve 0 nas três chaves",
+          "status": "done",
+          "evidence": "$ adb shell settings get secure screensaver_enabled → 0 · screensaver_activate_on_sleep → 0 · screensaver_activate_on_dock → 0",
+          "done_at": "2026-10-26T19:23:10"
+        },
+        {
+          "id": "F1.3",
+          "title": "Desligar rastreio de anúncio e envio de uso",
+          "requisito": "R-2",
+          "desc": "secure: os três limit_ad_tracking 0→1, USAGE_METRICS_UPLOAD_ENABLED e usage_metrics_marketing_enabled 1→0",
+          "pronto": "'settings get' no tablet devolve 1,1,1,0,0 nas cinco chaves",
+          "status": "done",
+          "evidence": "$ adb shell settings get secure limit_ad_tracking/amz_/non_amz_ → 1,1,1 · USAGE_METRICS_UPLOAD_ENABLED → 0 · usage_metrics_marketing_enabled → 0",
+          "done_at": "2026-10-26T19:23:11"
+        },
+        {
+          "id": "F1.4",
+          "title": "Desligar a localização do sistema",
+          "requisito": "R-2",
+          "desc": "global location_global_kill_switch 0→1",
+          "pronto": "'settings get' devolve 1 e persist.sys.timezone relido igual ao gravado na F0.1",
+          "status": "blocked",
+          "evidence": null,
+          "done_at": null,
+          "decidido": {
+            "escolha": "não perseguir a localização",
+            "criterio": "o Android repõe o valor de fábrica no boot (pkg:android defaultSystemSet) e localização não é propaganda nem vazamento"
+          }
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "title": "Desligar os apps que o quiosque não usa",
+      "detail": [
+        "Os 15: dee.app, afe.app, tablet.voiceassistant, mp3, avod, imdb.tv.mobile.app, kindle, audible, photos",
+        "Os 15 (cont.): weather, kingsoft.office.amz, windowshop, cloud9 (Silk), com.android.email, hybridadidservice",
+        "💡 Por quê: é a lista de apps visíveis que encerrou o loop de reinício do Fire-Tools #19",
+        "Protegido que recusar fica anotado no arquivo da F0.1 e a fila segue",
+        "Cada leva tem reinício próprio: o loop do Fire-Tools #19 só apareceu depois de reiniciar",
+        "Loop com adb vivo: 'adb wait-for-device shell pm enable <pacote>' na leva culpada, um por um",
+        "Cada reinício derruba o registrador de memória: ele é religado logo depois, o arquivo dele sobrevive"
+      ],
+      "items": [
+        {
+          "id": "F2.1",
+          "title": "Desligar 15 apps da Amazon, um por um",
+          "requisito": "R-3",
+          "desc": "Alexa, Music, Prime Video, IMDb, Kindle, Audible, Fotos, Clima, WPS, App Amazon, Silk, E-mail e o identificador de anúncio",
+          "pronto": "o script da F0.1, rodado de novo, lista os 15 em 'pm list packages -d' ou grava a linha de erro do adb de cada recusa",
+          "status": "done",
+          "evidence": "$ .claude/fire-estado.sh → 15 de 15 em pm list packages -d · 0 recusas por pacote protegido · pm clear não rodado",
+          "done_at": "2026-10-26T19:23:24"
+        },
+        {
+          "id": "F2.2",
+          "title": "Reiniciar depois dos 15 apps",
+          "requisito": "R-4",
+          "desc": "adb reboot só com a leva da F2.1 aplicada, antes de tocar na loja",
+          "pronto": "em 3 min o quiosque à frente, o script da F0.1 mostra os 15 desligados e glwatch.sh religado roda",
+          "status": "done",
+          "evidence": "$ adb reboot 19:23:32 → mResumedActivity com.openkiosk 19:24:29 (57 s) · fire-estado.sh → 15 desligados · glwatch.sh 1 processo",
+          "done_at": "2026-10-26T19:25:17"
+        },
+        {
+          "id": "F2.3",
+          "title": "Desligar a Loja da Amazon e reiniciar",
+          "requisito": "R-3",
+          "desc": "com.amazon.venezia sozinha, depois da F2.2 verde, com reinício próprio",
+          "pronto": "venezia em 'pm list packages -d' ou com o erro de protegido colado e, após reiniciar, o quiosque à frente em 3 min",
+          "status": "done",
+          "evidence": "$ adb shell pm disable-user --user 0 com.amazon.venezia → disabled-user · após adb reboot, mResumedActivity com.openkiosk em 16 s",
+          "done_at": "2026-10-26T19:27:37"
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "title": "Quiosque de pé depois do reinício",
+      "detail": [
+        "Hoje o Home resolve para com.amazon.firelauncher (lido no tablet)",
+        "O guia kiosk-satellite diz que o Fire OS 8 pode recusar a troca; aí o vigia segue trazendo o quiosque",
+        "O reinício derruba o registrador de memória do vazamento; o arquivo dele sobrevive e ele é religado"
+      ],
+      "items": [
+        {
+          "id": "F3.1",
+          "title": "Devolver o botão Home ao quiosque",
+          "requisito": "R-4",
+          "desc": "cmd package set-home-activity com.openkiosk/.presentation.MainActivity",
+          "pronto": "resolve-activity HOME devolve com.openkiosk, ou a recusa do adb colada no arquivo da F0.1",
+          "status": "done",
+          "evidence": "$ cmd package set-home-activity → Success, mas resolve-activity HOME → com.amazon.firelauncher · recusa anotada em .claude/fire-estado-2026-10-26.md",
+          "done_at": "2026-10-26T19:28:15"
+        },
+        {
+          "id": "F3.2",
+          "title": "Reiniciar e conferir tudo",
+          "requisito": "R-4",
+          "desc": "adb reboot, conferência de F1, F2, Home e das permissões do vigia, e religar o registrador de memória",
+          "pronto": "o script da F0.1 relido após 3 min mostra quiosque à frente, Home, stay_on 7, SYSTEM_ALERT_WINDOW allow e glwatch vivo",
+          "status": "done",
+          "evidence": "$ adb reboot → quiosque à frente 16 s após boot · fire-estado.sh → Home firelauncher (recusa F3.1), stay_on 7, SAW allow, glwatch 1, 16 desligados · chaves iguais ao reinício anterior · print sem bloqueio",
+          "done_at": "2026-10-26T19:29:51"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "title": "Barrar anúncio pela rede",
+      "detail": [
+        "(a) dns.adguard.com: só anúncios, sem conta; a atualização do sistema segue",
+        "(b) NextDNS com conta do dono: anúncios + lista de endereços de atualização da Amazon",
+        "(c) (a) + Wi-Fi 'Mozilla' marcado como tarifado, que atrapalha a atualização sem garantia",
+        "Barrar a atualização congela o motor da página na v148, que ela instala (dumpsys: installer = ota, 2026-07-24)",
+        "Desligar o pacote de atualização não funciona na 8.3.3.8 (XDA Fire Toolbox pág. 851)",
+        "Desfazer: settings put global private_dns_mode off"
+      ],
+      "items": [
+        {
+          "id": "F4.1",
+          "title": "Ligar o DNS privado escolhido",
+          "requisito": "R-5",
+          "desc": "private_dns_mode hostname e private_dns_specifier com o provedor escolhido",
+          "pronto": "as duas chaves lidas com o provedor, 'ping -c1 doubleclick.net' resolvendo 0.0.0.0 ou unknown host, e a página no print",
+          "status": "done",
+          "evidence": "$ settings get global private_dns_mode/specifier → hostname dns.adguard-dns.com · ping aax-fe.amazon-adsystem.com → 127.0.0.1 · sobreviveu ao reinício das 00:44",
+          "done_at": "2026-10-27T00:46:21",
+          "decidido": {
+            "escolha": "(a) dns.adguard-dns.com, só anúncios; a atualização do sistema segue",
+            "criterio": "dono delegou em 26/10 ('faz o que eu pedi... se vira'); bloqueia os 4 servidores de anúncio do kso e não congela o motor da página"
+          }
+        }
+      ]
+    },
+    {
+      "id": "F5",
+      "title": "Conta Amazon",
+      "detail": [
+        "Com conta logada, apps desligados e anúncios voltam (Fire-Tools #61 e #27)",
+        "Hoje: 9 contas, 6 do tipo amazon.account (dumpsys account)",
+        "Fica por último: o efeito sobre o Controle Parental, que administra o aparelho, é desconhecido",
+        "Desfazer: Configurações > Minha conta > Registrar, com e-mail e senha da conta Amazon"
+      ],
+      "items": [
+        {
+          "id": "F5.1",
+          "title": "Tirar o tablet da conta Amazon",
+          "requisito": "R-1",
+          "desc": "Desregistro pelo próprio dono, seguido de reinício e da conferência da F3.2",
+          "pronto": "dumpsys account sem amazon.account e o quiosque de pé após reiniciar, como na F3.2",
+          "espera_dono": "confirmar e fazer o desregistro em Configurações > Minha conta > Cancelar registro",
+          "status": "todo",
+          "evidence": null,
+          "done_at": null
+        }
+      ]
+    },
+    {
+      "id": "F6",
+      "title": "Observar e registrar",
+      "items": [
+        {
+          "id": "F6.1",
+          "title": "Conferir 48 h depois se algo voltou",
+          "requisito": "R-1",
+          "desc": "Reler chaves, apps desligados e DNS, e tirar print",
+          "pronto": "diff do script da F0.1 contra o original colado, e o print da tela olhado sem anúncio nem protetor de tela",
+          "espera_dono": "ligar o cabo USB 48 h depois da F3.2",
+          "status": "todo",
+          "evidence": null,
+          "done_at": null
+        },
+        {
+          "id": "F6.2",
+          "title": "Gravar a receita no doc de publicação",
+          "requisito": "R-6",
+          "desc": "Provisionamento de .claude/docs/deploy.md ganha os comandos das F1 a F4 com o desfazer",
+          "pronto": "um diff entre os comandos do doc de provisionamento e o arquivo gerado na F0.1 não mostra comando sem desfazer",
+          "status": "done",
+          "evidence": "$ comm -23 chaves de settings put da seção nova do deploy.md × desfazer do fire-estado-2026-10-26.md → vazio · 10 chaves no doc, todas com desfazer",
+          "done_at": "2026-10-26T19:30:40"
+        }
+      ]
+    }
+  ],
+  "limites": [
+    {
+      "limite": "Não funciona na 8.3.3.8: desligar ofertas (kso), atualização (ota) ou a tela inicial da Amazon",
+      "motivo": "são protegidos, 'Cannot disable a protected package' (Fire-Tools #20)"
+    },
+    {
+      "limite": "Não funciona: ksoHash 0, a remoção de anúncio do Fire Toolbox e Android limpo",
+      "motivo": "exige root, só vai até a 8.3.3.7 e a trava de inicialização segue fechada"
+    },
+    {
+      "limite": "Não mexer: parentalcontrols, pm, appverification, dcp, platform, client.metrics, tcomm, device.sync",
+      "motivo": "a lista ampla com eles fez um Fire 7 2022 reiniciar em loop (Fire-Tools #19)"
+    },
+    {
+      "limite": "Não mexer: otter.oobe, webview.chromium, tahoe",
+      "motivo": "quebra data e hora, desenha a página e depende do administrador do aparelho"
+    },
+    {
+      "limite": "Avisos que descem do topo seguem ligados (heads_up_notifications_enabled)",
+      "motivo": "o vigia do quiosque usa esse canal para relançar a tela"
+    },
+    {
+      "limite": "Pagar a taxa de remoção de ofertas à Amazon fica fora",
+      "motivo": "saída paga do dono, que só volta à mesa se a F6.1 mostrar propaganda de volta"
+    },
+    {
+      "limite": "Loop de reinício sem adb fica sem desfazer pelo cabo",
+      "motivo": "a saída é restaurar de fábrica pelo modo de recuperação e reprovisionar pelo deploy.md"
+    },
+    {
+      "limite": "Provedor de DNS fora do ar deixa o tablet sem resolver nome nenhum",
+      "motivo": "o modo hostname do DNS privado não cai para o DNS do roteador"
+    },
+    {
+      "limite": "Efeito do desregistro sobre o Controle Parental segue desconhecido",
+      "motivo": "nenhuma fonte achada testou isso num tablet com o Controle Parental como administrador"
+    }
+  ],
+  "created": "2026-10-26",
+  "status": "active"
+}
