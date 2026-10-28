@@ -1,10 +1,10 @@
 ---
-generated: 2026-08-15
-generated-commit: 628b8ea
+generated: 2026-10-27
+generated-commit: 9130597
 project: open-kiosk
 scope: [app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionAnalyzer.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt, app/src/main/java/com/openkiosk/sensors/SensorWakeManager.kt, app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt, app/src/main/java/com/openkiosk/presentation/component/KioskWebView.kt, app/src/main/java/com/openkiosk/presentation/component/PinDialog.kt, app/src/test/java/com/openkiosk/presentation/KioskViewModelSensorOffTest.kt, app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerLightTest.kt, app/src/test/java/com/openkiosk/service/WatchdogBackoffTest.kt, app/src/test/java/com/openkiosk/service/GraphicsRestartTest.kt, app/src/test/java/com/openkiosk/service/LockscreenAdTest.kt]
 verified-by: "./gradlew testDebugUnitTest (resultados em app/build/test-results/testDebugUnitTest/*.xml); no aparelho: adb logcat -s MotionDetection:D ScreenState:D KioskWebView:E para ler changeRatio, transicoes de estado e morte do renderer"
-doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#f86ec3ad
+doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#c56ffd94
 ---
 
 # Convencoes e armadilhas (patterns)
