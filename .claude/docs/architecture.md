@@ -164,6 +164,11 @@ ScreenState.valueOf(prefs.getString(KioskPrefs.KEY_SCREEN_STATE, null) ?: "")
   `configure()` (so solta se ja ha janela anexada) e `attachActivity()` (solta quando a
   janela volta). Sem isso, desligar a agenda noturna com o painel apagado deixaria o
   quiosque preto para sempre.
+- [confirmado] Em `attachActivity()` a soltura passa por
+  `releaseStrandedOnAttach(configured, deepSleepEnabled, state)`: o campo `configured` so vira
+  `true` dentro de `configure()`. No arranque frio a janela anexa antes do banco responder, e o
+  padrao `deepSleepEnabled = false` acendia o painel de madrugada a cada reinicio de processo
+  (medido no Fire em 2026-10-27). Se a config chega depois, quem solta e `configure()`.
 - [confirmado] `isInDeepSleepWindow()` trata a virada de meia-noite: se
   `deepSleepStartHour > deepSleepEndHour`, vale `hour >= start || hour < end`.
 - [confirmado] O monitor de sono profundo e um `Runnable` reagendado a cada
@@ -307,6 +312,23 @@ internal fun relaunchDelayMs(consecutiveMisses: Int): Long =
 - [confirmado nesta sessao, no aparelho] O efeito medido do servico em primeiro plano:
   `oom_score_adj = 0` (app comum em segundo plano fica em 700) — o sistema poupa este
   processo na hora de matar por memoria.
+- [confirmado] Duas guardas a mais vivem no mesmo servico, porque ele e o pedaco do processo
+  que nasce no boot (`BootReceiver`) e nao morre com a activity:
+  - **Anuncio de tela de bloqueio**: um `ContentObserver` em `Settings.Global` observa
+    `LOCKSCREEN_AD_ENABLED` e devolve `"0"` quando `lockscreenAdIsOn(value)`. Quem religa a chave
+    em todo boot e o pacote de ofertas do Fire (`pkg:com.amazon.kindle.kso` no historico de
+    `dumpsys settings`), protegido contra `pm disable-user` e `pm suspend`. Exige
+    `android.permission.WRITE_SECURE_SETTINGS` no `AndroidManifest.xml` (`tools:ignore=
+    "ProtectedPermissions"`) concedida por `adb shell pm grant`; sem ela o observador so loga.
+  - **Teto de memoria de video**: a cada `GRAPHICS_CHECK_MS = 10 min` le
+    `ActivityManager.getProcessMemoryInfo(...).getMemoryStat("summary.graphics")` e, se
+    `shouldRestartForGraphics(kb, estado guardado)` (acima de `GRAPHICS_RESTART_KB = 300_000L`
+    e tela em SLEEP/DEEP_SLEEP), agenda a `MainActivity` num `AlarmManager` 2 s a frente e faz
+    `Process.killProcess`. O processo novo volta pelo arranque frio no estado guardado. Existe
+    porque o WebView do Fire prende ~0,3 MB por carregamento de pagina e so processo novo
+    devolve (detalhe e medicoes em **patterns.md**). Testado no aparelho com teto baixo: 6
+    reinicios, estado `DEEP_SLEEP` mantido; entre a morte e a volta a tela inicial da Amazon
+    chegou a aparecer numa amostra.
 - [confirmado] Aviso plantado para o futuro: em `onCreate`, se `SDK_INT >= 34` e
   `!manager.canUseFullScreenIntent()`, o servico loga "USE_FULL_SCREEN_INTENT nao concedida
   — relance degradado a banner". O comentario diz que no Fire atual isso nao morde.

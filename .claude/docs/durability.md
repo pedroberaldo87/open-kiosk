@@ -128,9 +128,20 @@ adb shell settings put global stay_on_while_plugged_in 7
 adb shell locksettings set-disabled true
 adb shell cmd package set-home-activity com.openkiosk/.presentation.MainActivity
 adb shell appops set com.openkiosk SYSTEM_ALERT_WINDOW allow
+adb shell pm grant com.openkiosk android.permission.WRITE_SECURE_SETTINGS
 ```
 
-- O último é **obrigatório**: sem ele o vigia não consegue relançar o aplicativo. A
+- A limpeza da Amazon de 2026-10-26/27 também mora aqui, fora do app: 17 pacotes em
+  `pm disable-user`, ajustes `secure` de anúncio, protetor de tela e coleta, o DNS privado
+  (`private_dns_mode hostname` + `dns.adguard-dns.com`) e a recarga automática em 0 na gaveta. A
+  receita com o desfazer está no doc de publicação; o retrato do estado de antes é
+  `.claude/fire-estado-2026-10-26.md`, regerável por `.claude/fire-estado.sh` — o único pedaço do
+  provisionamento que é arquivo executável [confirmado].
+- O `pm grant` de `WRITE_SECURE_SETTINGS` some com desinstalar ou restaurar de fábrica; se
+  sobrevive a `adb install -r` não foi conferido (nesta sessão ele foi reaplicado depois de cada
+  reinstalação) — confira com `adb shell dumpsys package com.openkiosk | grep WRITE_SECURE`. Sem
+  ele o vigia não desliga o anúncio que o pacote de ofertas religa em todo boot [inferido].
+- O `SYSTEM_ALERT_WINDOW` é **obrigatório**: sem ele o vigia não consegue relançar o aplicativo. A
   permissão está declarada no manifesto (`android.permission.SYSTEM_ALERT_WINDOW`, com
   o comentário no próprio arquivo explicando a isenção de início em segundo plano) — [confirmado],
   mas declarar não concede: quem concede é o `appops` acima.

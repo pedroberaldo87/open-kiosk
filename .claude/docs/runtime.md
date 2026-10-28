@@ -252,6 +252,8 @@ abertura manual.
 BootReceiver.onReceive(ACTION_BOOT_COMPLETED)
   ├─ packageManager.getLaunchIntentForPackage(...) + FLAG_ACTIVITY_NEW_TASK → startActivity
   └─ KioskWatchdogService.start(context)
+       └─ onCreate: observa global LOCKSCREEN_AD_ENABLED e devolve "0" (disableLockscreenAd)
+                    + graphicsRunnable a cada 10 min (teto de memória de vídeo)
 
 MainActivity.attachBaseContext(newBase)
   └─ lê KioskPrefs.KEY_LANGUAGE ANTES da injeção do Hilt; se != "auto", createConfigurationContext
@@ -292,6 +294,13 @@ Ordem que importa — **estado guardado → brilho → config real libera câmer
     câmera nos ajustes.
 - `configure()` reaplica o brilho (`applyBrightness(brightnessFor(_screenState.value))`) porque
   `attachActivity` rodou antes da config real e usou o `dimBrightness` padrão [confirmado].
+- Pelo mesmo motivo, `attachActivity` NÃO solta o sono profundo antes da config real:
+  `releaseStrandedOnAttach(configured, ...)` só libera depois de `configure()` ter rodado. Antes
+  disso o padrão "agenda desligada" acendia o painel em todo arranque frio de madrugada (medido no
+  Fire em 2026-10-27; com a guarda, 6 reinícios seguidos voltaram em `DEEP_SLEEP`) [confirmado].
+- No Fire, quem religa o anúncio da tela de bloqueio no boot é o pacote de ofertas
+  (`pkg:com.amazon.kindle.kso` em `dumpsys settings`); o observador do vigia o desliga de novo, e
+  depois do reinício de 2026-10-27 o último gravador era `pkg:com.openkiosk value:0` [confirmado].
 - `resumeTimers()` religa o cronômetro a partir do estado atual SEM carimbar presença de usuário —
   voltar do `onResume` não é gente na frente. Ele também repõe o `deepSleepCheckRunnable`, que
   `detachActivity()` tinha retirado [confirmado].
@@ -305,6 +314,7 @@ Ordem que importa — **estado guardado → brilho → config real libera câmer
   adb shell locksettings set-disabled true
   adb shell cmd package set-home-activity com.openkiosk/.presentation.MainActivity
   adb shell appops set com.openkiosk SYSTEM_ALERT_WINDOW allow    # obrigatória para o relance
+  adb shell pm grant com.openkiosk android.permission.WRITE_SECURE_SETTINGS   # o vigia desliga o anúncio
   ```
   Sem dono do dispositivo, `KioskLockManager.startLockTask()` cai no `else` e só entra em modo
   imersivo [confirmado, `KioskLockManager.startLockTask`].
@@ -350,9 +360,16 @@ WebViewClient.onRenderProcessGone(view, detail)
   o menu manda `0` para "Desativado", e agendar com atraso 0 seria recarga em laço contínuo
   [confirmado; coberto por `app/src/test/java/com/openkiosk/webview/AutoRefreshDisabledTest.kt`].
 - Opções do menu: 0, 5, 10, 15, 30, 60 minutos [confirmado, `options` em `AutoRefreshSection`].
-- **Buraco na troca do intervalo** [inferido — não reproduzido no aparelho]: `startAutoRefresh()` só
+- **Neste tablet fica em "Desativado"** (`autoRefreshMinutes|0` no banco desde 2026-10-27). Cada
+  recarga recria o `KioskWebView` e prende ~0,3 MB de memória de vídeo que só um processo novo
+  devolve; a recarga de 5 min somou 974 MB em 62 dias. A página do DAILY-SCREEN busca tarefas e
+  clima sozinha. Com a recarga desligada: 1 carregamento de página em ~22 h de uso real
+  [confirmado]. O que sobra fica sob o teto de memória do vigia (caminho 5).
+- **Buraco na troca do intervalo** [confirmado em parte no aparelho]: `startAutoRefresh()` só
   é chamado em `KioskViewModel.attachActivity()`. Mudar o valor na gaveta grava o campo mas não
-  reagenda nada. Duas consequências:
+  reagenda nada; no arranque frio o relógio é armado com o padrão de 30 min porque a config do
+  banco chega depois do `attachActivity` (medido: 3 s configurado, zero recargas em 11 min até um
+  `onPause`/`onResume`). Duas consequências:
   - de 0 para 30 min: nada é agendado até o próximo `onResume`;
   - de 30 min para 0 ("Desativado"): o `Runnable` já armado continua, e quando dispara ele faz
     `handler.postDelayed(this, autoRefreshIntervalMs)` lendo o campo VIVO, agora 0 — exatamente a

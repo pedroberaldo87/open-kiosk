@@ -1,387 +1,530 @@
 {
-  ".claude/intent/audit-1786818422.json": {
-    "mtime": 1786819103.3117883,
-    "ast_hash": "4b1d4bcf188924312cc9800dc7577f8e",
-    "semantic_hash": ""
-  },
-  ".claude/intent/audit-1786818487.json": {
-    "mtime": 1786819103.3116803,
-    "ast_hash": "4b1d4bcf188924312cc9800dc7577f8e",
-    "semantic_hash": ""
-  },
   "app/build.gradle.kts": {
     "mtime": 1786763482.732602,
+    "seen": 1793153859.293445,
     "ast_hash": "d52d6653e314229ce8e29ba81bc9460b",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/OpenKioskApplication.kt": {
     "mtime": 1786761791.2926352,
+    "seen": 1793153859.293445,
     "ast_hash": "46d96f8486bb7a5da03f5072bc85623a",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/local/AppDatabase.kt": {
     "mtime": 1786761791.2927547,
+    "seen": 1793153859.2934458,
     "ast_hash": "c73ebdaf5db4d9ace812e6f2244b797e",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt": {
     "mtime": 1786817412.9306135,
+    "seen": 1793153859.2934458,
     "ast_hash": "00cc4233a4bd16b84c2519e5cef91b5b",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt": {
     "mtime": 1786761791.2928393,
+    "seen": 1793153859.293447,
     "ast_hash": "52c227f18800b37e8a94664135eabe0b",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt": {
     "mtime": 1786761791.2928848,
+    "seen": 1793153859.293448,
     "ast_hash": "7c0d5a6b17a05a31123db944d863fba3",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt": {
     "mtime": 1786761791.2929628,
+    "seen": 1793153859.293448,
     "ast_hash": "f38073378a0bdf1bc1057ce853738dcf",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt": {
     "mtime": 1786761791.293013,
+    "seen": 1793153859.293449,
     "ast_hash": "3476e7e6cee1a7cf3fd4c888fc1015f4",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt": {
     "mtime": 1786820863.832891,
+    "seen": 1793153859.293449,
     "ast_hash": "a0b2990f83da005df20c3e74ecc9c433",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt": {
     "mtime": 1786761791.293155,
+    "seen": 1793153859.2934499,
     "ast_hash": "75a8cdf25bdccc5227d98a8075addb0b",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/di/DatabaseModule.kt": {
     "mtime": 1786761791.2932281,
+    "seen": 1793153859.2934499,
     "ast_hash": "477603cd0b3243d90dba3e50d7c911ca",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/domain/PlaylistManager.kt": {
     "mtime": 1786761791.2933242,
+    "seen": 1793153859.293451,
     "ast_hash": "4520e635d82b124050b6887cdd061f75",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt": {
     "mtime": 1786820863.831456,
+    "seen": 1793153859.293451,
     "ast_hash": "f3f13b96f104d5d29019a778ee53a53f",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/domain/model/PlaylistItem.kt": {
     "mtime": 1786761791.2935,
+    "seen": 1793153859.293452,
     "ast_hash": "1467ef151d16884c992e83a8c403005b",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/domain/model/ScreenState.kt": {
     "mtime": 1786761791.2935514,
+    "seen": 1793153859.293452,
     "ast_hash": "d964e3a1306960865df8adc05cf1a34e",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/kiosk/KioskLockManager.kt": {
     "mtime": 1786766155.2621427,
+    "seen": 1793153859.293453,
     "ast_hash": "92f12e2205f5b48a4f0e7ca52318c5c1",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/power/PowerStateMonitor.kt": {
     "mtime": 1786817590.1689937,
+    "seen": 1793153859.293453,
     "ast_hash": "e613c2ce426d16711f78cf4c3c229fe4",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/MainActivity.kt": {
     "mtime": 1786817424.2049415,
+    "seen": 1793153859.2934542,
     "ast_hash": "5a4298d2b31a7b12d54262881983c37e",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/component/KioskWebView.kt": {
-    "mtime": 1786765324.684567,
+    "mtime": 1793069195.3043165,
+    "seen": 1793153859.2934542,
     "ast_hash": "bf5c4fb87d8b1f848fcb2d102a5606a0",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/component/OfflineScreen.kt": {
     "mtime": 1786761791.2939284,
+    "seen": 1793153859.2934551,
     "ast_hash": "55c43164ffea90ccb1123adf7c55a142",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/component/PinDialog.kt": {
     "mtime": 1786761791.2939851,
+    "seen": 1793153859.2934551,
     "ast_hash": "653723c8cb39a1a9c009909fca92633f",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt": {
-    "mtime": 1786763351.0117962,
+    "mtime": 1793069195.3047452,
+    "seen": 1793153859.2934558,
     "ast_hash": "72e843516a27fb4029dadaaf438225ac",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/screen/SettingsScreen.kt": {
-    "mtime": 1786817424.2059407,
+    "mtime": 1793049090.020203,
+    "seen": 1793153859.2934558,
     "ast_hash": "7a430c3f6fe48b15dbd5c2ef337b5f69",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/viewmodel/KioskViewModel.kt": {
-    "mtime": 1786817575.9532514,
+    "mtime": 1793062537.374383,
+    "seen": 1793153859.2934568,
     "ast_hash": "0ed2175bbbe888335d9755ae52d29acf",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/presentation/viewmodel/SettingsViewModel.kt": {
     "mtime": 1786761791.29564,
+    "seen": 1793153859.2934568,
     "ast_hash": "e9a69233a21a2607aecfacc944cf86d9",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/receiver/BootReceiver.kt": {
     "mtime": 1786766105.2708538,
+    "seen": 1793153859.293458,
     "ast_hash": "115ddc794da67fbca33b9ee7517e2cfe",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/receiver/KioskDeviceAdminReceiver.kt": {
     "mtime": 1786761791.295786,
+    "seen": 1793153859.293459,
     "ast_hash": "775ad12a38109ba42cddaf93ac259094",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/sensors/MotionDetectionAnalyzer.kt": {
     "mtime": 1786817610.2720463,
+    "seen": 1793153859.293459,
     "ast_hash": "6c6b739097b124574a8c170d173b3ce7",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt": {
     "mtime": 1786820863.8330283,
+    "seen": 1793153859.29346,
     "ast_hash": "f4e48f04716a3ac00fcb79e2e04ad202",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/sensors/SensorWakeManager.kt": {
     "mtime": 1786794457.4266593,
+    "seen": 1793153859.29346,
     "ast_hash": "ba10b7e3f387ace58cd5209142f6ed08",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/service/KioskWatchdogService.kt": {
-    "mtime": 1786817599.0574148,
-    "ast_hash": "d709f57690e29603c23470d6e9803e26",
+    "mtime": 1793072295.5782638,
+    "seen": 1793153859.293461,
+    "ast_hash": "e61cff37354e6f9766ee0358d981fda8",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt": {
-    "mtime": 1786817564.242815,
-    "ast_hash": "0a1a2eefed3e5b60a7ce2bb83c435faa",
+    "mtime": 1793072271.7900846,
+    "seen": 1793153859.293461,
+    "ast_hash": "f2b01599f606e7c19f4a25bd48535613",
     "semantic_hash": ""
   },
   "app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt": {
     "mtime": 1786820880.08276,
+    "seen": 1793153859.293462,
     "ast_hash": "8b117682d44f4c0cd1c98be8edb9d1a2",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/presentation/KioskViewModelAttachTest.kt": {
     "mtime": 1786794620.9824576,
+    "seen": 1793153859.293462,
     "ast_hash": "78df8d12a57401e3af1dce977ae2a287",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/presentation/KioskViewModelConfigSensorsTest.kt": {
     "mtime": 1786794671.0899312,
+    "seen": 1793153859.293463,
     "ast_hash": "35bf22dd99fff0974c7305f343f2cf41",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/presentation/KioskViewModelPlaceholderConfigTest.kt": {
     "mtime": 1786794621.0191457,
+    "seen": 1793153859.293464,
     "ast_hash": "d3417cf335b564ae935c5997ae975d86",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/presentation/KioskViewModelReattachSensorsTest.kt": {
     "mtime": 1786794621.036285,
+    "seen": 1793153859.293464,
     "ast_hash": "175ecd158b814f046f0fdcf2909115b5",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/presentation/KioskViewModelSensorOffTest.kt": {
     "mtime": 1786817624.6164973,
+    "seen": 1793153859.2934651,
     "ast_hash": "17db2837f718a17e9d71a9fc947cacbe",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerLightTest.kt": {
     "mtime": 1786764706.292018,
+    "seen": 1793153859.2934651,
     "ast_hash": "c99b72ee211a324e6866461e6db86124",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerPulseWarmupTest.kt": {
     "mtime": 1786765110.8558505,
+    "seen": 1793153859.293466,
     "ast_hash": "c7f12e2bb462f3592fa0d3a1299c4753",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerResetTest.kt": {
     "mtime": 1786763803.2690833,
+    "seen": 1793153859.293466,
     "ast_hash": "c89a8424f4efb7079a0a392ddcdc4a24",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/sensors/SensorWakeProximityTest.kt": {
     "mtime": 1786768777.9416523,
+    "seen": 1793153859.2934668,
     "ast_hash": "7d12f3e23308633792a674265e7c7aab",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/service/KioskWatchdogRelaunchTest.kt": {
     "mtime": 1786770611.2961311,
+    "seen": 1793153859.293468,
     "ast_hash": "1ec1b31fabc0f53967212ef70abe0732",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/service/WatchdogBackoffTest.kt": {
     "mtime": 1786794684.3810513,
+    "seen": 1793153859.293469,
     "ast_hash": "d7ef925b2b364e612d24c47c6e6130d4",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/sleep/BrightnessForStateTest.kt": {
     "mtime": 1786794679.8183196,
+    "seen": 1793153859.293469,
     "ast_hash": "b01e0cc332a5d32addbb1526f928ec38",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/sleep/ScreenStateDeepSleepExitTest.kt": {
-    "mtime": 1786770733.7788253,
-    "ast_hash": "ac36bdf64a4124579ba563b7631a1276",
+    "mtime": 1793072278.7809904,
+    "seen": 1793153859.29347,
+    "ast_hash": "398ae44496bfef1f38e5983dd81667ae",
     "semantic_hash": ""
   },
   "app/src/test/java/com/openkiosk/webview/AutoRefreshDisabledTest.kt": {
     "mtime": 1786820873.3295512,
+    "seen": 1793153859.2934709,
     "ast_hash": "a007058f97d570a6a33f6bbcea3ddc9a",
     "semantic_hash": ""
   },
   "build.gradle.kts": {
     "mtime": 1786761791.2968223,
+    "seen": 1793153859.2934709,
     "ast_hash": "7c77e4fa4061c34ad06457febe70f75f",
     "semantic_hash": ""
   },
   "gradlew": {
     "mtime": 1786761791.2975402,
+    "seen": 1793153859.293472,
     "ast_hash": "b6511d4bd6d6bae66e148d16105a5e6b",
     "semantic_hash": ""
   },
   "settings.gradle.kts": {
     "mtime": 1786761791.3131115,
+    "seen": 1793153859.293472,
     "ast_hash": "8a684a4f8a09acab04207ef0128ebc1d",
     "semantic_hash": ""
   },
   ".claude/CLAUDE.md": {
     "mtime": 1786821144.0005684,
+    "seen": 1793153859.293473,
     "ast_hash": "41e78afe5a0e0195db65d75df49465b9",
     "semantic_hash": ""
   },
   ".github/ISSUE_TEMPLATE/bug_report.yml": {
     "mtime": 1786761791.2915282,
+    "seen": 1793153859.293439,
     "ast_hash": "ed2bd94997768fa427cd753b7b80b863",
     "semantic_hash": ""
   },
   ".github/ISSUE_TEMPLATE/feature_request.yml": {
     "mtime": 1786761791.2916045,
+    "seen": 1793153859.29344,
     "ast_hash": "9c1245de5d3fca4d5755dfd688b86a15",
     "semantic_hash": ""
   },
   ".github/PULL_REQUEST_TEMPLATE.md": {
     "mtime": 1786761791.2916687,
+    "seen": 1793153859.293477,
     "ast_hash": "ecc295491c80f6091ee4c10dccc4df54",
     "semantic_hash": ""
   },
   ".github/workflows/build.yml": {
     "mtime": 1786761791.2917552,
+    "seen": 1793153859.293441,
     "ast_hash": "109e91bef85a831c238fabcb271c9933",
     "semantic_hash": ""
   },
   "CHANGELOG.md": {
-    "mtime": 1786761791.2918584,
-    "ast_hash": "7c591179bbd0700ff3d81dc201124e85",
+    "mtime": 1786823033.4027817,
+    "seen": 1793153859.293479,
+    "ast_hash": "d977743948f35d7d2a58b337389acf76",
     "semantic_hash": ""
   },
   "CODE_OF_CONDUCT.md": {
     "mtime": 1786761791.2919068,
+    "seen": 1793153859.293479,
     "ast_hash": "052b29c4ffe6a3088ebe4a7d0939f29c",
     "semantic_hash": ""
   },
   "CONTRIBUTING.md": {
     "mtime": 1786761791.2919579,
+    "seen": 1793153859.29348,
     "ast_hash": "9017909e79ee35c940451ec4b93ee358",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1786761791.2921584,
-    "ast_hash": "6cc9d6b73dea73b39dc927836b38a6e4",
+    "mtime": 1786823015.648343,
+    "seen": 1793153859.2934809,
+    "ast_hash": "29ea2092c5bf7c0063722117736ebf48",
     "semantic_hash": ""
   },
   "SECURITY.md": {
     "mtime": 1786761791.2922192,
+    "seen": 1793153859.293482,
     "ast_hash": "44fbf5006b7fc0f432b9d0a7ecd0adbc",
     "semantic_hash": ""
   },
   "screenshots/daily-screen-alldone.png": {
     "mtime": 1786761791.2983375,
+    "seen": 1793153859.293484,
     "ast_hash": "4643045796e860e0d6f7768c513257b0",
     "semantic_hash": ""
   },
   "screenshots/daily-screen-checklist.png": {
     "mtime": 1786761791.3037243,
+    "seen": 1793153859.2934852,
     "ast_hash": "94f4168514320fcf0b2362da7816cdeb",
     "semantic_hash": ""
   },
   "screenshots/daily-screen-progress.png": {
     "mtime": 1786761791.3088782,
+    "seen": 1793153859.293486,
     "ast_hash": "5594a68f5737e6fd31ffa0fba6bf4bfb",
     "semantic_hash": ""
   },
   "screenshots/settings-kiosk.png": {
     "mtime": 1786761791.3099442,
+    "seen": 1793153859.293486,
     "ast_hash": "8b344e571e8afedaa53cb978f77e86d3",
     "semantic_hash": ""
   },
   "screenshots/settings-sensors.png": {
     "mtime": 1786761791.3129938,
+    "seen": 1793153859.293487,
     "ast_hash": "41c68fd6f205806d265787766ffe225f",
     "semantic_hash": ""
   },
   ".claude/.project-doc/ledger.json": {
     "mtime": 1786819607.0805027,
+    "seen": 1793153859.2934332,
     "ast_hash": "484a08ee751d9b75980ed9a4c7bc5588",
     "semantic_hash": ""
   },
   ".claude/docs/architecture.md": {
-    "mtime": 1786821203.7525568,
-    "ast_hash": "39b03495e8b81e4d3f7a3866eb067f7a",
+    "mtime": 1786823055.3694015,
+    "seen": 1793153859.293473,
+    "ast_hash": "48b2b40ff057273bbd20cfac635f5cac",
     "semantic_hash": ""
   },
   ".claude/docs/data-stores.md": {
-    "mtime": 1786821203.753946,
-    "ast_hash": "39597d24f781a2e6e2333c47e15d57f0",
+    "mtime": 1786823055.369955,
+    "seen": 1793153859.293474,
+    "ast_hash": "2534671ca8c487edcca829bfc361c145",
     "semantic_hash": ""
   },
   ".claude/docs/deploy.md": {
-    "mtime": 1786821203.7551987,
-    "ast_hash": "b32101a042515c8a3907a51738c53799",
+    "mtime": 1793072758.0827,
+    "seen": 1793153859.2934752,
+    "ast_hash": "4d3817e5bbd15e4f721c453a8fd6dfb1",
     "semantic_hash": ""
   },
   ".claude/docs/durability.md": {
-    "mtime": 1786821203.758041,
-    "ast_hash": "a9f4623dee9a6d378b7951c1f8712d94",
+    "mtime": 1786823055.3704472,
+    "seen": 1793153859.2934752,
+    "ast_hash": "1af59ed12eafcf91863edca4b02423f1",
     "semantic_hash": ""
   },
   ".claude/docs/patterns.md": {
-    "mtime": 1786821203.758935,
-    "ast_hash": "f4a7549f130f180c00c515ae0c567f08",
+    "mtime": 1786823055.3707993,
+    "seen": 1793153859.293476,
+    "ast_hash": "6f9707f84851850b964f269b2c4b0e3c",
     "semantic_hash": ""
   },
   ".claude/docs/runtime.md": {
-    "mtime": 1786821203.763151,
-    "ast_hash": "68911a2ecd12e27177f45146206dcd1a",
+    "mtime": 1786823055.371376,
+    "seen": 1793153859.293476,
+    "ast_hash": "a21b00c4b4cb694931a814fb497de030",
     "semantic_hash": ""
   },
   ".github/copilot-instructions.md": {
     "mtime": 1786821153.5353463,
+    "seen": 1793153859.2934778,
     "ast_hash": "4607c5029d967a8056b5ec11bf7e0ea3",
     "semantic_hash": ""
   },
   "AGENTS.md": {
     "mtime": 1786821153.5333755,
+    "seen": 1793153859.2934778,
     "ast_hash": "e57c27cb2980b0e8786cbf80688f2d14",
     "semantic_hash": ""
   },
   "GEMINI.md": {
     "mtime": 1786821153.5334604,
+    "seen": 1793153859.2934809,
     "ast_hash": "13a4924814587302026eb320030ba01e",
+    "semantic_hash": ""
+  },
+  ".claude/fire-estado.sh": {
+    "mtime": 1793053360.7592936,
+    "seen": 1793153859.2934358,
+    "ast_hash": "a5d3c170baa0e7e471658ca8234a9b73",
+    "semantic_hash": ""
+  },
+  ".claude/plans/2026-10-26-fire-limpeza.plan.json": {
+    "mtime": 1793072781.1357784,
+    "seen": 1793153859.293438,
+    "ast_hash": "27916961d00fcb6a3628ddc97e67b0eb",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/page-2026-10-26T20-35-43-807Z.yml": {
+    "mtime": 1793046943.8079898,
+    "seen": 1793153859.293441,
+    "ast_hash": "849e792ffb48156b754244b4d12e530a",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/page-2026-10-26T20-35-59-185Z.yml": {
+    "mtime": 1793046959.1856654,
+    "seen": 1793153859.293442,
+    "ast_hash": "19db447173d598fb0f49ab80ee0d93c3",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/page-2026-10-26T20-36-08-726Z.yml": {
+    "mtime": 1793046968.7268407,
+    "seen": 1793153859.293442,
+    "ast_hash": "7850b50ed281fec79c71966adc17c522",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/page-2026-10-26T21-12-52-578Z.yml": {
+    "mtime": 1793049172.578438,
+    "seen": 1793153859.293443,
+    "ast_hash": "ecf8f42c6112f749c4c0d0a57dc8afa3",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/page-2026-10-26T21-14-15-505Z.yml": {
+    "mtime": 1793049255.5065851,
+    "seen": 1793153859.2934442,
+    "ast_hash": "89d7c8e0e0b5966ed76337ec9989e33e",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/service/GraphicsRestartTest.kt": {
+    "mtime": 1793071477.155762,
+    "seen": 1793153859.2934668,
+    "ast_hash": "11f6d2f6a2b77c269efaa007d8132547",
+    "semantic_hash": ""
+  },
+  "app/src/test/java/com/openkiosk/service/LockscreenAdTest.kt": {
+    "mtime": 1793059722.2549381,
+    "seen": 1793153859.293468,
+    "ast_hash": "8d3cf04c8163d9f24227d97206a1e13f",
+    "semantic_hash": ""
+  },
+  ".claude/fire-estado-2026-10-26.md": {
+    "mtime": 1793053695.615673,
+    "seen": 1793153859.293477,
+    "ast_hash": "bf2a0ee702a93344bf0c36f224cb6a73",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/ds_after.png": {
+    "mtime": 1793049178.685375,
+    "seen": 1793153859.293482,
+    "ast_hash": "7ddbfc0e3d4932eae58fa8cbf54beb48",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/ds_after2.png": {
+    "mtime": 1793049220.4297643,
+    "seen": 1793153859.293483,
+    "ast_hash": "5ff85a94bf0ffa780b669740488b76cd",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/ds_after3.png": {
+    "mtime": 1793049258.8508775,
+    "seen": 1793153859.293484,
+    "ast_hash": "c32ebd18ffcd2c193189a8c414d13cf8",
     "semantic_hash": ""
   }
 }
