@@ -6,7 +6,7 @@
 
 ## Checklist
 - [ ] Tested on a real device (emulator is insufficient for kiosk/camera features)
-- [ ] `./gradlew lintDebug` passes with no new warnings
-- [ ] UI strings added to both `res/values/strings.xml` and `res/values-pt/strings.xml`
+- [ ] `./gradlew testDebugUnitTest lintDebug` passes with no new warnings
+- [ ] UI strings added to `res/values/strings.xml`, `res/values-pt/strings.xml` and `res/values-es/strings.xml`
 - [ ] No hardcoded strings in Kotlin/Compose UI code
 - [ ] CHANGELOG.md updated (if user-facing change)

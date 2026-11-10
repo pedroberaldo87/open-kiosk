@@ -13,7 +13,7 @@
 Instead, use one of these options:
 
 1. **GitHub Private Vulnerability Reporting** — go to the Security tab of this repository and click "Report a vulnerability"
-2. **Direct contact** — reach out to the maintainer via their GitHub profile
+2. **Direct contact** — reach out to the maintainer via their GitHub profile (@pedroberaldo87)
 
 ### What to include
 

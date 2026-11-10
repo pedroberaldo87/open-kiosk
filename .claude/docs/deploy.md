@@ -204,8 +204,9 @@ adb shell settings put global private_dns_mode hostname
 
 ```bash
 adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver
-adb shell dpm remove-active-admin com.openkiosk/.receiver.KioskDeviceAdminReceiver
 ```
+
+- Não existe comando `adb` que desfaça o device owner: `dpm remove-active-admin` falha com `SecurityException: Attempt to remove non-test admin` e `adb uninstall` falha com `DELETE_FAILED_INTERNAL_ERROR`. Só restauração de fábrica. [confirmado em emulador Android 14, 2026-11-10]
 
 - O receptor existe: `AndroidManifest.xml` declara `.receiver.KioskDeviceAdminReceiver` com `android:permission="android.permission.BIND_DEVICE_ADMIN"`, `exported="true"`, meta-data `android.app.device_admin` -> `@xml/device_admin_policies` e acao `android.app.action.DEVICE_ADMIN_ENABLED`. Costura conferida nos dois lados. [confirmado]
 - `app/src/main/res/xml/device_admin_policies.xml` pede uma unica politica: `<force-lock />`. Nada de wipe, senha ou camera. [confirmado]

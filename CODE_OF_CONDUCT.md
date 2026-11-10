@@ -33,7 +33,7 @@ Examples of unacceptable behavior:
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported by opening an issue on this repository or contacting the maintainer
-via their GitHub profile.
+via their GitHub profile (@pedroberaldo87).
 
 All complaints will be reviewed and investigated and will result in a response
 that is deemed necessary and appropriate to the circumstances.
