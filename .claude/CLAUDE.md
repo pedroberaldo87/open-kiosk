@@ -46,7 +46,7 @@ Contagens deste projeto (derive, não confie no número escrito):
 
 ## Knowledge Graph (graphify)
 
-Existe um grafo do código em `graphify-out/` (`graph.json`, `graph.html`, `GRAPH_REPORT.md`).
+O grafo do código fica em `graphify-out/` (`graph.json`, `graph.html`, `GRAPH_REPORT.md`) e **não é versionado**: gere-o localmente com `graphify update . --force`. Se a pasta não existir, ignore esta seção.
 Consulte-o antes de mexer em código que você não conhece: ele diz quem depende de quem e quais
 peças são mais conectadas. Atualize com `graphify update . --force` (só análise estática, sem custo
 de modelo).

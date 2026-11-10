@@ -31,17 +31,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Scheduled deep sleep window (touch-only wake, all sensors off) and a language selector (English, Portuguese, Spanish)
 - Foreground watchdog service that holds the process and brings the kiosk back when something
   covers it, with backoff from 5s to 60s
 - Power-aware camera duty cycle: continuous analysis on mains, pulsed on battery
 - Screen state persisted across process death, so a relaunch returns to the same state
 - Cable provisioning instructions for retail Fire tablets, where device owner is unavailable
+- The watchdog switches off the Fire lock-screen ad again when Fire OS re-enables it (needs `WRITE_SECURE_SETTINGS`, granted over ADB)
+- The watchdog restarts the process while the screen is asleep when video memory grows past a limit, and a cold start no longer lights the screen if the stored state was asleep
 - Unit test suite (`./gradlew testDebugUnitTest`)
-- Project documentation under `.claude/docs/` and a code knowledge graph
+- Project documentation under `.claude/docs/`
+- `README.pt-BR.md`, a Portuguese translation of the README
+- CI runs the unit tests, uses actions pinned by commit SHA and read-only token permissions
+
+### Changed
+
+- README rewritten against the current code: settings ranges and defaults, permissions, provisioning commands, known limitations
+- Generated and machine-specific files (`graphify-out/`, local Fire state and plans under `.claude/`) are no longer tracked
+- Settings screenshots regenerated from the current build with synthetic data
 
 ### Removed
 
-- `cameraPollingIntervalSeconds` setting, which was persisted but never read by anything
+- `cameraPollingIntervalSeconds` setting, which was persisted but never read by anything (the "Camera polling" row is gone from the drawer)
 
 ## [1.0.0] - 2025-06-01
 

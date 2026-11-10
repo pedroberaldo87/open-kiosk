@@ -14,7 +14,7 @@ For large changes or new features, please open an issue first to discuss the app
 ## Development Setup
 
 1. Clone your fork
-2. Open in Android Studio (Hedgehog 2023.1.1 or newer)
+2. Open in Android Studio (Hedgehog 2023.1.1 or newer), or install JDK 17 and the Android SDK (platform 34) and set `ANDROID_HOME`
 3. Let Gradle sync complete
 4. Build: `./gradlew assembleDebug`
 
@@ -27,9 +27,14 @@ For large changes or new features, please open an issue first to discuss the app
 # Release build (requires signing config in local.properties)
 ./gradlew assembleRelease
 
+# Unit tests (JVM, no device needed)
+./gradlew testDebugUnitTest
+
 # Lint check
 ./gradlew lintDebug
 ```
+
+CI runs `testDebugUnitTest`, `lintDebug` and `assembleDebug` on every pull request.
 
 ## Code Style
 
@@ -44,10 +49,11 @@ All user-facing strings must go in resource files — no hardcoded strings in Ko
 
 - English: `res/values/strings.xml`
 - Portuguese: `res/values-pt/strings.xml`
+- Spanish: `res/values-es/strings.xml`
 
 ## Before Submitting
 
-- Run `./gradlew lintDebug` and fix any issues
+- Run `./gradlew testDebugUnitTest lintDebug` and fix any issues
 - Test on a real Android device — the emulator is insufficient for kiosk mode, camera-based motion detection, and sensor features
 - Make sure the app builds cleanly with `./gradlew assembleDebug`
 
