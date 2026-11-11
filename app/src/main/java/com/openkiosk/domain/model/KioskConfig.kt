@@ -23,8 +23,9 @@ data class KioskConfig(
 
     // Kiosk
     val lockTaskEnabled: Boolean = true,
+    // Off by default is an owner decision (the PIN must not be mandatory on first run). The PIN
+    // itself is never part of this model: it only exists as a hash behind PinRepository.
     val pinEnabled: Boolean = false,
-    val pin: String = "0000",
 
     // General
     val startUrl: String = "https://www.google.com"

@@ -46,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +61,15 @@ import com.openkiosk.BuildConfig
 import com.openkiosk.R
 import com.openkiosk.domain.model.MotionSensitivity
 import com.openkiosk.domain.model.PlaylistItem
+import com.openkiosk.domain.security.PinPolicy
+import com.openkiosk.domain.security.PinVerifyResult
+import com.openkiosk.domain.security.SetPinResult
+import com.openkiosk.presentation.component.ChoosePinDialog
+import com.openkiosk.presentation.component.PinErrorText
+import com.openkiosk.presentation.component.SetPinErrorText
+import com.openkiosk.presentation.component.rememberLockoutCountdown
 import com.openkiosk.presentation.viewmodel.SettingsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsDrawerContent(
@@ -135,8 +144,12 @@ fun SettingsDrawerContent(
             KioskSection(
                 lockTaskEnabled = config.lockTaskEnabled,
                 pinEnabled = config.pinEnabled,
-                pin = config.pin,
-                onUpdate = { key, value -> viewModel.updateConfig(key, value) }
+                onUpdate = { key, value -> viewModel.updateConfig(key, value) },
+                onTryEnablePin = { viewModel.tryEnablePinProtection() },
+                onEnablePinWith = { viewModel.enablePinProtectionWith(it) },
+                onVerifyPin = { viewModel.verifyPin(it) },
+                onChangePin = { viewModel.changePin(it) },
+                lockoutRemainingMs = { viewModel.pinLockoutRemainingMs() }
             )
 
             SectionDivider()
@@ -570,17 +583,36 @@ private fun LanguageSection() {
 private fun KioskSection(
     lockTaskEnabled: Boolean,
     pinEnabled: Boolean,
-    pin: String,
-    onUpdate: (String, String) -> Unit
+    onUpdate: (String, String) -> Unit,
+    onTryEnablePin: suspend () -> Boolean,
+    onEnablePinWith: suspend (String) -> SetPinResult,
+    onVerifyPin: suspend (String) -> PinVerifyResult,
+    onChangePin: suspend (String) -> SetPinResult,
+    lockoutRemainingMs: suspend () -> Long
 ) {
+    val scope = rememberCoroutineScope()
+    var showChoosePin by remember { mutableStateOf(false) }
+
     SwitchRow(stringResource(R.string.switch_lock_task), lockTaskEnabled) {
         onUpdate("lockTaskEnabled", it.toString())
     }
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    SwitchRow(stringResource(R.string.switch_pin_protection), pinEnabled) {
-        onUpdate("pinEnabled", it.toString())
+    SwitchRow(stringResource(R.string.switch_pin_protection), pinEnabled) { on ->
+        if (!on) {
+            onUpdate("pinEnabled", "false")
+        } else {
+            // Turning protection on with the default 0000 is refused: ask for a PIN instead.
+            scope.launch { if (!onTryEnablePin()) showChoosePin = true }
+        }
+    }
+
+    if (showChoosePin) {
+        ChoosePinDialog(
+            onChoose = onEnablePinWith,
+            onDismiss = { showChoosePin = false }
+        )
     }
 
     if (pinEnabled) {
@@ -610,11 +642,9 @@ private fun KioskSection(
 
         if (showPinChange) {
             PinChangeDialog(
-                currentPin = pin,
-                onConfirm = { newPin ->
-                    onUpdate("pin", newPin)
-                    showPinChange = false
-                },
+                onVerify = onVerifyPin,
+                onChange = onChangePin,
+                lockoutRemainingMs = lockoutRemainingMs,
                 onDismiss = { showPinChange = false }
             )
         }
@@ -623,13 +653,19 @@ private fun KioskSection(
 
 @Composable
 private fun PinChangeDialog(
-    currentPin: String,
-    onConfirm: (String) -> Unit,
+    onVerify: suspend (String) -> PinVerifyResult,
+    onChange: suspend (String) -> SetPinResult,
+    lockoutRemainingMs: suspend () -> Long,
     onDismiss: () -> Unit
 ) {
     var step by remember { mutableStateOf(0) } // 0 = verify current, 1 = enter new
     var input by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf(false) }
+    var wrongPin by remember { mutableStateOf(false) }
+    var setResult by remember { mutableStateOf<SetPinResult?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    val lockout = rememberLockoutCountdown(lockoutRemainingMs)
+    val scope = rememberCoroutineScope()
+    val locked = step == 0 && lockout.remainingMs > 0L
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -639,45 +675,54 @@ private fun PinChangeDialog(
                 OutlinedTextField(
                     value = input,
                     onValueChange = { value ->
-                        if (value.length <= 4 && value.all { it.isDigit() }) {
+                        if (value.length <= PinPolicy.PIN_LENGTH && value.all { it in '0'..'9' }) {
                             input = value
-                            error = false
+                            wrongPin = false
+                            setResult = null
                         }
                     },
                     label = { Text(if (step == 0) stringResource(R.string.hint_enter_current_pin) else stringResource(R.string.hint_enter_new_pin)) },
                     singleLine = true,
+                    enabled = !locked,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    isError = error,
+                    isError = wrongPin || setResult != null,
                     modifier = Modifier.fillMaxWidth()
                 )
-                if (error) {
-                    Text(
-                        text = stringResource(R.string.error_wrong_pin),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                if (step == 0) {
+                    PinErrorText(wrongPin = wrongPin && !locked, lockoutRemainingMs = lockout.remainingMs)
+                } else {
+                    SetPinErrorText(setResult)
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                if (step == 0) {
-                    if (input == currentPin) {
-                        step = 1
-                        input = ""
-                        error = false
-                    } else {
-                        error = true
-                        input = ""
-                    }
-                } else {
-                    if (input.length == 4) {
-                        onConfirm(input)
+            TextButton(
+                enabled = !locked && !busy,
+                onClick = {
+                    busy = true
+                    scope.launch {
+                        if (step == 0) {
+                            when (val r = onVerify(input)) {
+                                is PinVerifyResult.Success -> {
+                                    step = 1
+                                    wrongPin = false
+                                }
+                                is PinVerifyResult.Wrong -> {
+                                    wrongPin = true
+                                    lockout.start(r.lockoutMs)
+                                }
+                                is PinVerifyResult.LockedOut -> lockout.start(r.remainingMs)
+                            }
+                            input = ""
+                        } else {
+                            val r = onChange(input)
+                            if (r == SetPinResult.OK) onDismiss() else setResult = r
+                        }
+                        busy = false
                     }
                 }
-            }) {
+            ) {
                 Text(stringResource(R.string.action_ok))
             }
         },

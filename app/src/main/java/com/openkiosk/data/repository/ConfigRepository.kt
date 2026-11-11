@@ -4,6 +4,7 @@ import com.openkiosk.data.local.dao.ConfigDao
 import com.openkiosk.data.local.entity.ConfigEntity
 import com.openkiosk.domain.model.KioskConfig
 import com.openkiosk.domain.model.MotionSensitivity
+import com.openkiosk.domain.security.PinKeys
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -11,7 +12,8 @@ import javax.inject.Singleton
 
 @Singleton
 class ConfigRepository @Inject constructor(
-    private val configDao: ConfigDao
+    private val configDao: ConfigDao,
+    private val pinRepository: PinRepository
 ) {
     fun observeConfig(): Flow<KioskConfig> = configDao.observeAll().map { entities ->
         val map = entities.associate { it.key to it.value }
@@ -32,13 +34,21 @@ class ConfigRepository @Inject constructor(
             autoRefreshMinutes = map["autoRefreshMinutes"]?.toIntOrNull() ?: 30,
             lockTaskEnabled = map["lockTaskEnabled"]?.toBooleanStrictOrNull() ?: true,
             pinEnabled = map["pinEnabled"]?.toBooleanStrictOrNull() ?: false,
-            pin = map["pin"] ?: "0000",
             startUrl = map["startUrl"] ?: "https://www.google.com"
         )
     }
 
     suspend fun updateConfig(key: String, value: String) {
-        configDao.set(ConfigEntity(key, value))
+        when (key) {
+            // PIN-related keys go through PinRepository so the default-PIN, hashing and lockout
+            // rules cannot be skipped by a generic write.
+            PinKeys.PIN -> pinRepository.setPin(value)
+            PinKeys.ENABLED ->
+                if (value.toBooleanStrictOrNull() == true) pinRepository.tryEnableProtection()
+                else pinRepository.disableProtection()
+            PinKeys.FAILED_ATTEMPTS, PinKeys.LOCKED_UNTIL_MS -> Unit
+            else -> configDao.set(ConfigEntity(key, value))
+        }
     }
 
     suspend fun updateConfig(config: KioskConfig) {
@@ -56,9 +66,8 @@ class ConfigRepository @Inject constructor(
             ConfigEntity("deepSleepEndHour", config.deepSleepEndHour.toString()),
             ConfigEntity("autoRefreshMinutes", config.autoRefreshMinutes.toString()),
             ConfigEntity("lockTaskEnabled", config.lockTaskEnabled.toString()),
-            ConfigEntity("pinEnabled", config.pinEnabled.toString()),
-            ConfigEntity("pin", config.pin),
             ConfigEntity("startUrl", config.startUrl)
         ))
+        updateConfig(PinKeys.ENABLED, config.pinEnabled.toString())
     }
 }

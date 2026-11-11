@@ -58,6 +58,15 @@ Nao existe banco remoto, nem servidor, nem sincronizacao. Nada sai do tablet. [c
   migracao declarada, o Room derruba o aplicativo ao abrir o banco antigo. [inferido — regra do
   Room, nao reproduzida neste aparelho]
 
+### PIN (versao 2 do banco)
+
+- A versao do banco e 2. A migracao 1 -> 2 (**Migrations.kt**) troca o PIN em texto puro por hash
+  `pbkdf2-sha256$iteracoes$sal$hash` (**PinHasher.kt**); o PIN nunca mais aparece em `KioskConfig`.
+- Chaves da tabela `config` que so **PinRepository.kt** escreve: `pin` (hash), `pinFailedAttempts`,
+  `pinLockedUntilMs`. `ConfigRepository.updateConfig` desvia `pin` e `pinEnabled` para o
+  `PinRepository` e ignora os contadores.
+- `pinEnabled=true` so e gravado se o PIN guardado nao for o 0000 de fabrica.
+
 ### Tabela `config` — o ajuste do quiosque
 
 Formato: chave/valor, tudo texto.

@@ -50,6 +50,11 @@
     <string name="hint_enter_new_pin">Digite o novo PIN</string>
     <string name="label_pin">PIN</string>
     <string name="error_wrong_pin">PIN incorreto</string>
+    <string name="dialog_title_choose_pin">Escolha um PIN</string>
+    <string name="message_choose_pin_to_enable">A proteção por PIN não pode ser ligada enquanto o PIN for o padrão 0000. Escolha outro PIN de 4 dígitos.</string>
+    <string name="error_pin_default_rejected">O PIN não pode ser 0000. Escolha outro PIN.</string>
+    <string name="error_pin_invalid_format">O PIN deve ter exatamente 4 dígitos.</string>
+    <string name="error_pin_locked">Muitas tentativas erradas. Tente de novo em %1$s.</string>
 
     <!-- Actions -->
     <string name="action_close">Fechar</string>

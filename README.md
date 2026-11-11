@@ -157,7 +157,7 @@ Swipe in from the left edge of the screen to open the settings drawer. The drawe
 | | Deep sleep (touch-only) | on / off, start and end hour | off, 22:00 to 06:00 |
 | Kiosk | Lock Task Mode | on / off | on |
 | | PIN protection | on / off | off |
-| | Change PIN | 4 digits; asks for the current PIN | 0000 |
+| | Change PIN | 4 digits, not 0000; asks for the current PIN | none (you choose one when turning protection on) |
 | Language | Language | Auto (system), English, Português, Español | Auto |
 
 ![Settings drawer scrolled to the sensors: wake switches, camera sensitivity and camera pulse interval](screenshots/settings-sensors.png)
@@ -264,7 +264,7 @@ Build instructions, code style and the PR checklist are in [CONTRIBUTING.md](CON
 
 Please report vulnerabilities privately; see [SECURITY.md](SECURITY.md). Known limitations to weigh before deploying:
 
-- The PIN is stored and compared as plain text. It is a 4-digit lock for the settings drawer, not a security boundary.
+- PIN protection is off by default (an owner decision: the PIN is not mandatory on first run). It cannot be turned on while the PIN is the old default 0000. The PIN is stored as a salted PBKDF2-HMAC-SHA256 hash and wrong guesses are rate limited (from the fifth wrong guess, a lockout that starts at 30 s, doubles and is capped at 1 h; it survives restarts). It is still a 4-digit lock for the settings drawer, not a security boundary.
 - The WebView only navigates to the hosts of your start URL and playlist (subdomains included); links and redirects to other hosts are blocked, and the kiosk then shows a local "Address not allowed" page with the blocked host. If your page signs in through another host (Google or Microsoft SSO, an OAuth provider) or redirects to another name, add that host as a playlist entry. Add the narrowest host you need: a shared-hosting apex opens every site under it. A host written with accents or other non-Latin letters (for example `bücher.example`) is matched through its punycode form. WebSocket connections are not restricted. Plain `http://` loads only for private/LAN hosts (RFC 1918, loopback, link-local, `.local`, `.lan`, single-label names) or for hosts you added as `http://` yourself (the app warns when you add one on a public host). The OS-level network security config still permits cleartext, because it cannot express IP ranges or hosts typed in at runtime. Use HTTPS for anything sensitive.
 - CI builds and uploads only a debug APK. There is no signed release.
 
