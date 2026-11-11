@@ -92,10 +92,12 @@ class KioskViewModel @Inject constructor(
                 // Sensibilidade muda no analyzer VIVO: sem isto, trocar nas configuracoes
                 // so vale depois de a camera religar.
                 motionDetectionManager.updateConfig(cfg.motionSensitivity.threshold)
-                val firstRealConfig = _realConfig.value == null
+                val previous = _realConfig.value
                 _realConfig.value = cfg
-                // O lock task esperou a config real; aplica agora se a activity ja subiu.
-                if (firstRealConfig) {
+                kioskLockManager.setKeepInFront(cfg.lockTaskEnabled)
+                // O lock task esperou a config real; aplica agora se a activity ja subiu,
+                // e de novo quando o dono liga ou desliga o modo quiosque.
+                if (previous == null || previous.lockTaskEnabled != cfg.lockTaskEnabled) {
                     activityRef?.get()?.let { applyKioskLock(it, cfg) }
                 }
                 // A config real do Room chega DEPOIS do valor de fabrica do stateIn:
@@ -140,7 +142,7 @@ class KioskViewModel @Inject constructor(
         activityRef = WeakReference(activity)
         screenStateManager.attachActivity(activity)
 
-        // Lock task so com a config REAL: o placeholder tem lockTaskEnabled=true e
+        // Lock task so com a config REAL: o placeholder nao reflete o que o dono escolheu e
         // travaria por um instante quem desligou. Sem config ainda, so imersivo.
         applyKioskLock(activity, realConfig.value)
 
@@ -165,6 +167,7 @@ class KioskViewModel @Inject constructor(
         if (cfg?.lockTaskEnabled == true) {
             kioskLockManager.startLockTask(activity)
         } else {
+            kioskLockManager.stopLockTask(activity)
             kioskLockManager.enterImmersiveMode(activity)
         }
     }

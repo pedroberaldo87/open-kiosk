@@ -333,4 +333,29 @@ class NavigationPolicyTest {
         // KioskConfig.startUrl default
         assertEquals(true, policy("https://www.google.com").allowsNavigation("https://www.google.com/search?q=x"))
     }
+    // ---- URLs typed without a scheme ------------------------------------------------------
+
+    @Test
+    fun `playlist url without scheme is allowed over https`() {
+        // Regression: a playlist saved as "example.com" loaded but the allowlist could not
+        // parse it, so the kiosk showed "Address not allowed" for its own page.
+        val p = policy("example.com")
+        assertTrue(p.allowsNavigation("https://example.com/"))
+        assertFalse(p.allowsNavigation("http://example.com/"))
+    }
+
+    @Test
+    fun `url without scheme gets https for public hosts and http for the LAN`() {
+        assertEquals("https://example.com", NavigationPolicy.withDefaultScheme("example.com"))
+        assertEquals("https://example.com/a?b=1", NavigationPolicy.withDefaultScheme("  example.com/a?b=1 "))
+        assertEquals("http://192.168.1.10:8123", NavigationPolicy.withDefaultScheme("192.168.1.10:8123"))
+        assertEquals("http://homeassistant.local", NavigationPolicy.withDefaultScheme("homeassistant.local"))
+    }
+
+    @Test
+    fun `urls that already have a scheme are kept`() {
+        assertEquals("http://example.com", NavigationPolicy.withDefaultScheme("http://example.com"))
+        assertEquals("https://example.com/x", NavigationPolicy.withDefaultScheme("https://example.com/x"))
+        assertEquals("about:blank", NavigationPolicy.withDefaultScheme("about:blank"))
+    }
 }

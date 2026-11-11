@@ -38,6 +38,20 @@ internal fun relaunchDelayMs(consecutiveMisses: Int): Long =
     else minOf(TICK_MS shl minOf(consecutiveMisses - 1, 4), MAX_TICK_MS)
 
 /**
+ * So relanca com o modo quiosque ligado: desligado, o dono pode sair para outro app e o
+ * watchdog nao o puxa de volta.
+ */
+internal fun shouldRelaunch(isForeground: Boolean, keepInFront: Boolean): Boolean =
+    !isForeground && keepInFront
+
+/**
+ * Reiniciar o processo relanca a activity. Com o modo quiosque desligado e o app fora da
+ * frente, isso abriria o quiosque por cima do que o dono estiver usando.
+ */
+internal fun mayRestartProcess(isForeground: Boolean, keepInFront: Boolean): Boolean =
+    isForeground || keepInFront
+
+/**
  * Decide, a partir do ESTADO GUARDADO (que sobrevive à morte do processo), se o relance
  * pode acender o painel. PowerManager.isInteractive não serve: enquanto a janela vive,
  * FLAG_KEEP_SCREEN_ON a mantém verdadeira mesmo dormindo, e quando o processo morre ela
@@ -81,7 +95,7 @@ class KioskWatchdogService : Service() {
 
     private val tickRunnable: Runnable = object : Runnable {
         override fun run() {
-            if (!MainActivity.isForeground) {
+            if (shouldRelaunch(MainActivity.isForeground, KioskPrefs.keepInFront(this@KioskWatchdogService))) {
                 consecutiveMisses++
                 if (consecutiveMisses > 1) {
                     Log.w(TAG, "relançamento anterior não trouxe a MainActivity de volta ($consecutiveMisses seguidas)")
@@ -145,7 +159,10 @@ class KioskWatchdogService : Service() {
             val state = KioskPrefs.of(this@KioskWatchdogService)
                 .getString(KioskPrefs.KEY_SCREEN_STATE, null)
             Log.d(TAG, "memória de vídeo: $graphicsKb KB (estado $state)")
-            if (shouldRestartForGraphics(graphicsKb, state)) restartProcess(graphicsKb)
+            val mayRestart = mayRestartProcess(
+                MainActivity.isForeground, KioskPrefs.keepInFront(this@KioskWatchdogService)
+            )
+            if (shouldRestartForGraphics(graphicsKb, state) && mayRestart) restartProcess(graphicsKb)
             else handler.postDelayed(this, GRAPHICS_CHECK_MS)
         }
     }

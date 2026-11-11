@@ -35,7 +35,7 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
         val all = mutableSetOf<String>()
         val clear = mutableSetOf<String>()
         for (raw in configuredUrls) {
-            val parsed = parseUrl(raw, configured = true) ?: continue
+            val parsed = parseUrl(withDefaultScheme(raw), configured = true) ?: continue
             if (parsed.scheme != "http" && parsed.scheme != "https") continue
             val base = parsed.host.removePrefix("www.")
             all += base
@@ -77,6 +77,7 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
 
     companion object {
         private val PREFIX = Regex("^([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)")
+        private val OPAQUE = Regex("^(about|data|file|javascript|blob):", RegexOption.IGNORE_CASE)
         private val HOST_NAME = Regex("^[a-z0-9._-]+$")
         private val IPV4 = Regex("^(0|[1-9][0-9]{0,2})(\\.(0|[1-9][0-9]{0,2})){3}$")
         private val IPV6 = Regex("^[0-9a-f:]+$")
@@ -131,6 +132,21 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
             val value = first.toInt(16)
             // fc00::/7 unique-local, fe80::/10 link-local
             return value in 0xfc00..0xfdff || value in 0xfe80..0xfebf
+        }
+
+        /**
+         * The URL the kiosk actually loads for what the owner typed. A configured URL without a
+         * scheme (`daily.example.com`, `192.168.1.10:8123`) used to reach the WebView as is, which
+         * guessed `http://`, while the allowlist could not parse it and blocked the page. Now the
+         * same normalised URL feeds both: `http://` for local-network hosts, `https://` otherwise.
+         */
+        fun withDefaultScheme(raw: String): String {
+            val trimmed = raw.trim()
+            if (trimmed.isEmpty() || PREFIX.containsMatchIn(trimmed) || OPAQUE.containsMatchIn(trimmed)) {
+                return trimmed
+            }
+            val host = parseUrl("http://$trimmed", configured = true)?.host ?: return "https://$trimmed"
+            return if (isPrivateHost(host)) "http://$trimmed" else "https://$trimmed"
         }
 
         /**
