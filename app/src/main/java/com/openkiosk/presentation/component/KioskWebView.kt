@@ -236,13 +236,13 @@ fun KioskWebView(
                         false
                     }
 
-                    loadUrl(url)
+                    loadUrl(NavigationPolicy.withDefaultScheme(url))
                 }
             },
             update = { webView ->
                 if (lastRequestedUrl != url) {
                     lastRequestedUrl = url
-                    webView.loadUrl(url)
+                    webView.loadUrl(NavigationPolicy.withDefaultScheme(url))
                 }
             }
         )

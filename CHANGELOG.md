@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   it does not open on boot, Back leaves the app, and the memory restart never opens it over
   another app. On: the previous behaviour. The setting is now labelled "Kiosk mode" instead of
   "Lock Task Mode". Installs that saved it as on keep it on
+- A start or playlist URL saved without a scheme (`daily.example.com`) is loaded as `https://`
+  (`http://` for local-network hosts) and joins the allowlist the same way. Before, the WebView
+  guessed the scheme while the allowlist could not parse the URL, so the kiosk blocked its own page
 
 ### Security
 
