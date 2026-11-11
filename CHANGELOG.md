@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- The kiosk WebView is confined to the hosts of the start URL and playlist (subdomains included).
+  Links, scripted navigation and redirects to other hosts are blocked
+- Plain `http://` only loads for private/LAN hosts or hosts the owner added as `http://`;
+  adding an `http://` URL on a public host now asks for confirmation
+- Removed the redundant `android:usesCleartextTraffic` manifest flag
+
 ### Fixed
 
 - Camera no longer mistakes a global light change for a person: the median frame-to-frame delta is

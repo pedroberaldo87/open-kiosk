@@ -265,7 +265,7 @@ Build instructions, code style and the PR checklist are in [CONTRIBUTING.md](CON
 Please report vulnerabilities privately; see [SECURITY.md](SECURITY.md). Known limitations to weigh before deploying:
 
 - The PIN is stored and compared as plain text. It is a 4-digit lock for the settings drawer, not a security boundary.
-- Cleartext HTTP is allowed for every host (`usesCleartextTraffic` plus a base network security config), not only for the local network. Use HTTPS for anything sensitive.
+- The WebView only navigates to the hosts of your start URL and playlist (subdomains included); links and redirects to other hosts are blocked. Plain `http://` loads only for private/LAN hosts (RFC 1918, loopback, link-local, `.local`, `.lan`, single-label names) or for hosts you added as `http://` yourself (the app warns when you add one on a public host). The OS-level network security config still permits cleartext, because it cannot express IP ranges or hosts typed in at runtime. Use HTTPS for anything sensitive.
 - CI builds and uploads only a debug APK. There is no signed release.
 
 ## Contributing

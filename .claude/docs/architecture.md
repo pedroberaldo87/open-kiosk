@@ -45,9 +45,11 @@ receiver/     BootReceiver, KioskDeviceAdminReceiver
   (`presentation/component/KioskWebView.kt`, montado por `KioskScreen`). O unico monitor de
   rede e o `ConnectivityManager.NetworkCallback` criado em
   `KioskViewModel :: startConnectivityMonitoring`.
-- [confirmado] `AndroidManifest.xml` traz `android:usesCleartextTraffic="true"` e
-  `android:networkSecurityConfig="@xml/network_security_config"` — quiosque aponta para
-  painel interno em HTTP simples com frequencia.
+- [confirmado] `AndroidManifest.xml` traz `android:networkSecurityConfig="@xml/network_security_config"`
+  (HTTP simples liberado no nivel do SO: quiosque aponta para painel interno em HTTP com
+  frequencia). A restricao real mora em `webview/NavigationPolicy.kt`, chamada pelo
+  `KioskWebView`: so navega para hosts da URL inicial/playlist e so aceita `http://` para host
+  privado/LAN ou configurado pelo dono como `http://`.
 
 ---
 

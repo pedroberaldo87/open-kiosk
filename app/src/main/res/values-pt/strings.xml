@@ -59,6 +59,9 @@
     <string name="action_remove">Remover</string>
     <string name="action_add_url">Adicionar URL</string>
     <string name="label_url">URL</string>
+    <string name="warning_http_title">Endereço inseguro</string>
+    <string name="warning_http_message">Este endereço usa http:// em um host público. Qualquer pessoa no caminho da rede pode ler ou alterar o que o quiosque exibe. Use https:// se o site oferecer.</string>
+    <string name="action_add_anyway">Adicionar mesmo assim</string>
     <string name="suffix_seconds">%ds</string>
 
     <!-- Language -->

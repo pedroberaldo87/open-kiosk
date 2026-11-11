@@ -267,7 +267,7 @@ Instruções de compilação, estilo de código e a lista de conferência do PR 
 Relate vulnerabilidades em particular; veja o [SECURITY.md](SECURITY.md) (em inglês). Limitações conhecidas para pesar antes de usar:
 
 - O PIN é guardado e comparado em texto puro. É uma trava de 4 dígitos para a gaveta de configurações, não uma barreira de segurança.
-- HTTP sem criptografia é permitido para qualquer host (`usesCleartextTraffic` mais uma configuração de rede base), não só para a rede local. Use HTTPS para qualquer coisa sensível.
+- O WebView só navega para os hosts da URL inicial e da playlist (subdomínios incluídos); links e redirecionamentos para outros hosts são bloqueados. `http://` puro só carrega para hosts privados/de rede local (RFC 1918, loopback, link-local, `.local`, `.lan`, nomes de um só rótulo) ou para hosts que você mesmo adicionou como `http://` (o app avisa ao adicionar um em host público). A configuração de rede do sistema ainda permite HTTP puro, porque ela não expressa faixas de IP nem hosts digitados em tempo de execução. Use HTTPS para qualquer coisa sensível.
 - O CI compila e publica só um APK de debug. Não há release assinado.
 
 ## Contribuindo
