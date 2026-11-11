@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Security
 
 - The kiosk WebView is confined to the hosts of the start URL and playlist (subdomains included).
-  Links, scripted navigation and redirects to other hosts are blocked
+  Links, scripted navigation and redirects to other hosts are blocked. A blocked main-frame load
+  shows a local "Address not allowed" page with the blocked host instead of a blank screen, and is
+  not reported as a successful load (no retry loop). Redirects to an SSO host need that host in
+  the playlist
+- Hosts typed with non-ASCII letters (`bücher.example`) are converted to punycode before they
+  join the allowlist, so they keep loading
 - Plain `http://` only loads for private/LAN hosts or hosts the owner added as `http://`;
   adding an `http://` URL on a public host now asks for confirmation
 - Removed the redundant `android:usesCleartextTraffic` manifest flag
