@@ -32,7 +32,7 @@ class ConfigRepository @Inject constructor(
             deepSleepStartHour = map["deepSleepStartHour"]?.toIntOrNull() ?: 22,
             deepSleepEndHour = map["deepSleepEndHour"]?.toIntOrNull() ?: 6,
             autoRefreshMinutes = map["autoRefreshMinutes"]?.toIntOrNull() ?: 30,
-            lockTaskEnabled = map["lockTaskEnabled"]?.toBooleanStrictOrNull() ?: true,
+            lockTaskEnabled = map["lockTaskEnabled"]?.toBooleanStrictOrNull() ?: false,
             pinEnabled = map["pinEnabled"]?.toBooleanStrictOrNull() ?: false,
             startUrl = map["startUrl"] ?: "https://www.google.com"
         )

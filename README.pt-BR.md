@@ -13,12 +13,12 @@ Navegador de quiosque para Android, de código aberto, feito para tablets fixos 
 ## Recursos
 
 - **Playlist de URLs**: várias URLs, cada uma com seu tempo na tela (de 10 s a 5 min), em rodízio automático. Com a playlist vazia, o app abre `https://www.google.com`.
-- **Trava de quiosque**: Lock Task Mode quando o app é device owner; modo imersivo fixo nos outros casos.
+- **Modo quiosque (opcional, vem desligado)**: ligado nas configurações, o vigia mantém o quiosque na frente, o app abre no boot, o Voltar fica bloqueado e o Lock Task Mode é usado quando o app é device owner. Desligado, o tablet continua seu: o Voltar sai do app e nada o puxa de volta.
 - **Suspender e acordar sem desligar a tela**: ACTIVE → DIM → SLEEP por tempo, mais uma janela agendada de DEEP_SLEEP. A tela é escurecida e coberta por uma sobreposição preta, nunca desligada, então os sensores continuam funcionando. O estado é gravado em disco: se o painel estava dormindo, o app reaberto volta escuro.
 - **Detecção de presença pela câmera**: CameraX, comparação de quadros no plano Y, com compensação de mudança global de luz para que o escurecimento do próprio painel não seja confundido com uma pessoa.
 - **Câmera consciente da energia**: na tomada, a câmera analisa sem parar; na bateria, ela pulsa no intervalo que você escolher.
 - **Outros gatilhos para acordar**: sacudir (acelerômetro), sensor de proximidade (quando o tablet tem um) e toque.
-- **Serviço vigia**: um serviço em primeiro plano que traz o quiosque de volta para a frente quando outro app o cobre, com espera crescente de 5 s até 60 s.
+- **Serviço vigia**: com o modo quiosque ligado, um serviço em primeiro plano traz o quiosque de volta para a frente quando outro app o cobre, com espera crescente de 5 s até 60 s.
 - **Recuperação da web**: recuperação de queda da WebView, novas tentativas após erro com espera crescente (5 s, 15 s, 30 s, 60 s), atualização automática opcional e tela de sem conexão.
 - **Gaveta de configurações**: deslize a partir da borda esquerda; PIN de 4 dígitos opcional (desligado por padrão).
 - **Idiomas**: inglês, português e espanhol, escolhidos automaticamente ou pela gaveta.
@@ -155,7 +155,7 @@ Deslize a partir da borda esquerda da tela para abrir a gaveta de configuraçõe
 | | Sensibilidade da câmera | Baixa, Média, Alta | Média |
 | | Pulso da câmera (só na bateria) | 5, 10, 15, 20, 30 ou 60 s | 10 s |
 | | Deep sleep (só toque) | ligado / desligado, hora de início e de fim | desligado, 22:00 às 06:00 |
-| Quiosque | Lock Task Mode | ligado / desligado | ligado |
+| Quiosque | Modo quiosque (manter na frente, abrir no boot, bloquear Voltar) | ligado / desligado | desligado |
 | | Proteção por PIN | ligado / desligado | desligado |
 | | Trocar PIN | 4 dígitos, diferente de 0000; pede o PIN atual | nenhum (você escolhe um ao ligar a proteção) |
 | Idioma | Idioma | Auto (sistema), English, Português, Español | Auto |

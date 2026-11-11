@@ -121,9 +121,11 @@ class MainActivity : ComponentActivity() {
         viewModel.detachActivity()
     }
 
-    @Suppress("DEPRECATION", "MissingSuperCall")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
-        // Intentionally not calling super — blocks back button in kiosk mode
+        // Voltar so fica bloqueado com o modo quiosque ligado; desligado, sai do app.
+        if (KioskPrefs.keepInFront(this)) return
+        super.onBackPressed()
     }
 
     private fun requestCameraIfNeeded(wakeOnMotion: Boolean) {

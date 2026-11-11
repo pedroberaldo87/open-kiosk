@@ -14,6 +14,16 @@ object KioskPrefs {
     const val KEY_SCREEN_STATE = "screen_state"
     const val KEY_LANGUAGE = "language"
 
+    /**
+     * Espelho de KioskConfig.lockTaskEnabled para quem nao le o Room: o watchdog (a cada
+     * tick), o BootReceiver e o botao Voltar. Escrito pelo KioskLockManager quando a config
+     * real chega. Ausente = desligado: o aparelho e de quem usa, prender e opcional.
+     */
+    const val KEY_KEEP_IN_FRONT = "keep_in_front"
+
+    fun keepInFront(context: Context): Boolean =
+        of(context).getBoolean(KEY_KEEP_IN_FRONT, false)
+
     fun of(context: Context): SharedPreferences =
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 }

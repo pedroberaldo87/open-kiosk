@@ -10,6 +10,7 @@ import android.os.Build
 import android.view.View
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import com.openkiosk.data.local.KioskPrefs
 import com.openkiosk.receiver.KioskDeviceAdminReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -50,6 +51,11 @@ class KioskLockManager @Inject constructor(
         } else {
             enterImmersiveMode(activity)
         }
+    }
+
+    /** Grava o espelho lido pelo watchdog, pelo BootReceiver e pelo Voltar. */
+    fun setKeepInFront(enabled: Boolean) {
+        KioskPrefs.of(context).edit().putBoolean(KioskPrefs.KEY_KEEP_IN_FRONT, enabled).apply()
     }
 
     fun stopLockTask(activity: Activity) {

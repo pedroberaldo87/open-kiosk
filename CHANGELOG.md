@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Kiosk mode is optional and off by default. Off: the watchdog no longer brings the app back,
+  it does not open on boot, Back leaves the app, and the memory restart never opens it over
+  another app. On: the previous behaviour. The setting is now labelled "Kiosk mode" instead of
+  "Lock Task Mode". Installs that saved it as on keep it on
+
 ### Security
 
 - The kiosk WebView is confined to the hosts of the start URL and playlist (subdomains included).

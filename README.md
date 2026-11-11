@@ -13,12 +13,12 @@ Open-source Android kiosk browser for wall-mounted tablets and digital signage: 
 ## Features
 
 - **URL playlist**: several URLs, each with its own display time (10 s to 5 min), rotated automatically. With an empty playlist the app opens `https://www.google.com`.
-- **Kiosk lock**: Lock Task Mode when the app is device owner, immersive sticky mode otherwise.
+- **Kiosk mode (optional, off by default)**: when switched on in the settings, the watchdog keeps the kiosk in front, the app opens on boot, Back is blocked, and Lock Task Mode is used when the app is device owner. Off, the tablet stays yours: Back leaves the app and nothing pulls it back.
 - **Sleep and wake without turning the screen off**: ACTIVE → DIM → SLEEP by timeouts, plus a scheduled DEEP_SLEEP window. The screen is dimmed and covered by a black overlay, never switched off, so sensors keep running. The state is saved to disk, so a relaunch comes back dark if the panel was asleep.
 - **Camera presence detection**: CameraX, Y-plane frame comparison, with compensation for global light changes so the panel dimming is not mistaken for a person.
 - **Power-aware camera**: on mains power the camera analyses continuously; on battery it pulses at the interval you choose.
 - **Other wake triggers**: accelerometer shake, proximity sensor (when the tablet has one) and touch.
-- **Watchdog service**: a foreground service that brings the kiosk back to the front when another app covers it, with backoff from 5 s to 60 s.
+- **Watchdog service**: with kiosk mode on, a foreground service brings the kiosk back to the front when another app covers it, with backoff from 5 s to 60 s.
 - **Web recovery**: WebView crash recovery, error retries with backoff (5 s, 15 s, 30 s, 60 s), optional auto-refresh, offline screen.
 - **Settings drawer**: swipe in from the left edge; optional 4-digit PIN (off by default).
 - **Languages**: English, Portuguese and Spanish, picked automatically or from the drawer.
@@ -155,7 +155,7 @@ Swipe in from the left edge of the screen to open the settings drawer. The drawe
 | | Camera sensitivity | Low, Medium, High | Medium |
 | | Camera pulse (battery only) | 5, 10, 15, 20, 30 or 60 s | 10 s |
 | | Deep sleep (touch-only) | on / off, start and end hour | off, 22:00 to 06:00 |
-| Kiosk | Lock Task Mode | on / off | on |
+| Kiosk | Kiosk mode (keep in front, open on boot, block Back) | on / off | off |
 | | PIN protection | on / off | off |
 | | Change PIN | 4 digits, not 0000; asks for the current PIN | none (you choose one when turning protection on) |
 | Language | Language | Auto (system), English, Português, Español | Auto |

@@ -22,7 +22,9 @@ data class KioskConfig(
     val autoRefreshMinutes: Int = 30,
 
     // Kiosk
-    val lockTaskEnabled: Boolean = true,
+    // Off by default: the device is the owner's to use. On = keep the kiosk in front
+    // (watchdog relaunch, open on boot, Back blocked, lock task when device owner).
+    val lockTaskEnabled: Boolean = false,
     // Off by default is an owner decision (the PIN must not be mandatory on first run). The PIN
     // itself is never part of this model: it only exists as a hash behind PinRepository.
     val pinEnabled: Boolean = false,

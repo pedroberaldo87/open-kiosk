@@ -37,7 +37,7 @@
     <string name="sensitivity_high">Alta</string>
 
     <!-- Settings: Kiosk -->
-    <string name="switch_lock_task">Lock Task Mode</string>
+    <string name="switch_lock_task">Modo quiosque (manter na frente, abrir no boot, bloquear Voltar)</string>
     <string name="switch_pin_protection">Proteção por PIN</string>
     <string name="label_current_pin">PIN atual</string>
     <string name="action_change_pin">Alterar PIN</string>

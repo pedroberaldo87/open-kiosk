@@ -37,7 +37,7 @@
     <string name="sensitivity_high">High</string>
 
     <!-- Settings: Kiosk -->
-    <string name="switch_lock_task">Lock Task Mode</string>
+    <string name="switch_lock_task">Kiosk mode (keep in front, open on boot, block Back)</string>
     <string name="switch_pin_protection">PIN protection</string>
     <string name="label_current_pin">Current PIN</string>
     <string name="action_change_pin">Change PIN</string>
