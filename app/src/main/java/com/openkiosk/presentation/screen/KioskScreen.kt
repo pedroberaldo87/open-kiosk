@@ -35,6 +35,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
     val needsRefresh by viewModel.needsRefresh.collectAsState()
     val config by viewModel.config.collectAsState()
     val screenState by viewModel.screenState.collectAsState()
+    val playlist by viewModel.playlistManager.playlist.collectAsState()
 
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
@@ -77,6 +78,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
                 androidx.compose.runtime.key(refreshKey) {
                     KioskWebView(
                         url = urlToLoad,
+                        allowedUrls = listOf(config.startUrl) + playlist.map { it.url },
                         onUserInteraction = { viewModel.onUserInteraction() },
                         paused = screenState == ScreenState.SLEEP ||
                             screenState == ScreenState.DEEP_SLEEP,
