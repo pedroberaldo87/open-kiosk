@@ -11,7 +11,8 @@ import javax.inject.Singleton
 
 @Singleton
 class ConfigRepository @Inject constructor(
-    private val configDao: ConfigDao
+    private val configDao: ConfigDao,
+    private val pinRepository: PinRepository
 ) {
     fun observeConfig(): Flow<KioskConfig> = configDao.observeAll().map { entities ->
         val map = entities.associate { it.key to it.value }
