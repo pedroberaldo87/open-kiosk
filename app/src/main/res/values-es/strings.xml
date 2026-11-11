@@ -71,4 +71,8 @@
     <!-- Offline screen -->
     <string name="offline_no_connection">Sin conexión</string>
     <string name="offline_waiting">Esperando conexión…</string>
+
+    <!-- Blocked page (navigation outside the configured hosts) -->
+    <string name="blocked_title">Dirección no permitida</string>
+    <string name="blocked_message">Esta dirección no está permitida por la configuración del quiosco. Para permitirla, añádela a la lista de reproducción.</string>
 </resources>

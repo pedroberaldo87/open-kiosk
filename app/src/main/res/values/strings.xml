@@ -71,4 +71,8 @@
     <!-- Offline screen -->
     <string name="offline_no_connection">No connection</string>
     <string name="offline_waiting">Waiting for connection…</string>
+
+    <!-- Blocked page (navigation outside the configured hosts) -->
+    <string name="blocked_title">Address not allowed</string>
+    <string name="blocked_message">This address is not allowed by the kiosk configuration. To allow it, add it to the playlist.</string>
 </resources>

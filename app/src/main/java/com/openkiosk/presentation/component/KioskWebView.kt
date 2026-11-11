@@ -17,8 +17,11 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.openkiosk.R
+import com.openkiosk.webview.BlockedPage
 import com.openkiosk.webview.NavigationPolicy
 import java.io.ByteArrayInputStream
+import java.util.concurrent.atomic.AtomicReference
 
 private const val TAG = "KioskWebView"
 
@@ -82,8 +85,16 @@ fun KioskWebView(
                     var customView: View? = null
                     var customViewCallback: WebChromeClient.CustomViewCallback? = null
 
+                    // Main-frame URL the policy refused and answered with the local blocked page.
+                    // Written on the IO thread of shouldInterceptRequest, read on the UI thread.
+                    val blockedMainFrame = AtomicReference<String?>(null)
+
                     webViewClient = object : WebViewClient() {
                         override fun onPageFinished(view: WebView?, url: String?) {
+                            // The blocked page is a finished load, but not a successful one: do not
+                            // report success to the recovery manager, and do not report an error
+                            // either, because retrying the same refused URL would reload forever.
+                            if (url != null && url == blockedMainFrame.get()) return
                             view?.evaluateJavascript(INJECT_JS, null)
                             onPageLoaded?.invoke()
                         }
@@ -141,8 +152,29 @@ fun KioskWebView(
                             } else {
                                 navigationPolicy.allowsRequest(target)
                             }
+                            if (request.isForMainFrame) {
+                                blockedMainFrame.set(if (allowed) null else target)
+                            }
                             if (allowed) return null
                             Log.w(TAG, "Blocked request to ${redact(target)}")
+                            if (request.isForMainFrame) {
+                                // Show why the screen is not the page the owner expects, with the
+                                // host to add to the playlist. Local data only: no network, no loop.
+                                val ctx = view?.context
+                                val page = BlockedPage.html(
+                                    title = ctx?.getString(R.string.blocked_title) ?: "Address not allowed",
+                                    message = ctx?.getString(R.string.blocked_message) ?: "",
+                                    host = NavigationPolicy.hostOf(target)
+                                )
+                                return WebResourceResponse(
+                                    "text/html",
+                                    "utf-8",
+                                    403,
+                                    "Blocked by kiosk policy",
+                                    emptyMap(),
+                                    ByteArrayInputStream(page.toByteArray(Charsets.UTF_8))
+                                )
+                            }
                             return WebResourceResponse(
                                 "text/plain",
                                 "utf-8",

@@ -50,6 +50,9 @@ receiver/     BootReceiver, KioskDeviceAdminReceiver
   frequencia). A restricao real mora em `webview/NavigationPolicy.kt`, chamada pelo
   `KioskWebView`: so navega para hosts da URL inicial/playlist e so aceita `http://` para host
   privado/LAN ou configurado pelo dono como `http://`.
+  Carga bloqueada do quadro principal mostra a pagina local `webview/BlockedPage.kt` (host
+  bloqueado) e nao conta como sucesso nem como erro, para a recuperacao nao recarregar em laco.
+  Host com acento na configuracao entra na lista em punycode.
 
 ---
 
