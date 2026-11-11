@@ -267,6 +267,67 @@ class NavigationPolicyTest {
         assertFalse(NavigationPolicy.isCleartextToPublicHost("example.com"))
     }
 
+    // ---- internationalised hosts ----------------------------------------------------------
+    // The owner may type a Unicode host; Chromium hands the WebView the punycode form.
+
+    @Test
+    fun `configured idn host matches its punycode form`() {
+        val p = policy("https://b\u00fccher.example/shelf")
+        assertTrue(p.allowsNavigation("https://xn--bcher-kva.example/"))
+        assertTrue(p.allowsNavigation("https://xn--bcher-kva.example./x"))
+        assertTrue(p.allowsNavigation("https://XN--BCHER-KVA.example:8443/x"))
+        assertTrue(p.allowsNavigation("https://www.xn--bcher-kva.example/"))
+        assertTrue(p.allowsNavigation("https://shop.xn--bcher-kva.example/"))
+    }
+
+    @Test
+    fun `configured idn host is normalised for case and trailing dot`() {
+        assertTrue(policy("https://B\u00dcCHER.example./").allowsNavigation("https://xn--bcher-kva.example/"))
+        assertTrue(policy("https://www.b\u00fccher.example/").allowsNavigation("https://xn--bcher-kva.example/"))
+    }
+
+    @Test
+    fun `configured punycode host matches itself and not lookalikes`() {
+        val p = policy("https://xn--bcher-kva.example/")
+        assertTrue(p.allowsNavigation("https://xn--bcher-kva.example/x"))
+        assertFalse(p.allowsNavigation("https://xn--bcher-kva.example.evil.test/"))
+        assertFalse(p.allowsNavigation("https://evilxn--bcher-kva.example/"))
+        assertFalse(p.allowsNavigation("https://bucher.example/"))
+    }
+
+    @Test
+    fun `configured idn host does not open lookalike hosts`() {
+        val p = policy("https://b\u00fccher.example/")
+        assertFalse(p.allowsNavigation("https://bucher.example/"))
+        assertFalse(p.allowsNavigation("https://xn--bcher-kva.example.evil.test/"))
+        assertFalse(p.allowsNavigation("https://xn--bcher-kva.evil.test/"))
+    }
+
+    @Test
+    fun `non ascii targets still fail closed even when the idn host is configured`() {
+        val p = policy("https://b\u00fccher.example/")
+        assertFalse(p.allowsNavigation("https://b\u00fccher.example/"))
+        assertFalse(p.allowsNavigation("https://bucher\u3002example/"))
+    }
+
+    @Test
+    fun `idn host configured as http keeps the cleartext rules`() {
+        val p = policy("http://b\u00fccher.example/")
+        assertTrue(p.allowsNavigation("http://xn--bcher-kva.example/"))
+        assertTrue(p.allowsRequest("http://xn--bcher-kva.example/img.png"))
+        assertTrue(NavigationPolicy.isCleartextToPublicHost("http://b\u00fccher.example/"))
+        assertFalse(policy("https://b\u00fccher.example/").allowsNavigation("http://xn--bcher-kva.example/"))
+    }
+
+    @Test
+    fun `an unconvertible configured host is skipped without throwing`() {
+        val tooLong = "a".repeat(64) + "\u00fc.example"
+        val p = policy("https://$tooLong/", "https://example.com/")
+        assertTrue(p.allowsNavigation("https://example.com/"))
+        assertFalse(p.allowsNavigation("https://evil.test/"))
+        assertFalse(NavigationPolicy.isCleartextToPublicHost("http://$tooLong/"))
+    }
+
     @Test
     fun `default start url stays navigable`() {
         // KioskConfig.startUrl default
