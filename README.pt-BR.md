@@ -157,7 +157,7 @@ Deslize a partir da borda esquerda da tela para abrir a gaveta de configuraçõe
 | | Deep sleep (só toque) | ligado / desligado, hora de início e de fim | desligado, 22:00 às 06:00 |
 | Quiosque | Lock Task Mode | ligado / desligado | ligado |
 | | Proteção por PIN | ligado / desligado | desligado |
-| | Trocar PIN | 4 dígitos; pede o PIN atual | 0000 |
+| | Trocar PIN | 4 dígitos, diferente de 0000; pede o PIN atual | nenhum (você escolhe um ao ligar a proteção) |
 | Idioma | Idioma | Auto (sistema), English, Português, Español | Auto |
 
 Os nomes dos controles na interface seguem o idioma escolhido; as capturas de tela abaixo foram feitas com a interface em inglês.
@@ -266,7 +266,7 @@ Instruções de compilação, estilo de código e a lista de conferência do PR 
 
 Relate vulnerabilidades em particular; veja o [SECURITY.md](SECURITY.md) (em inglês). Limitações conhecidas para pesar antes de usar:
 
-- O PIN é guardado e comparado em texto puro. É uma trava de 4 dígitos para a gaveta de configurações, não uma barreira de segurança.
+- A proteção por PIN vem desligada (decisão do dono: o PIN não é obrigatório no primeiro uso). Ela não pode ser ligada enquanto o PIN for o antigo padrão 0000. O PIN é guardado como hash PBKDF2-HMAC-SHA256 com sal e os erros são limitados (a partir do quinto erro, bloqueio que começa em 30 s, dobra e tem teto de 1 h; vale depois de reiniciar). Continua sendo uma trava de 4 dígitos para a gaveta, não uma barreira de segurança.
 - HTTP sem criptografia é permitido para qualquer host (`usesCleartextTraffic` mais uma configuração de rede base), não só para a rede local. Use HTTPS para qualquer coisa sensível.
 - O CI compila e publica só um APK de debug. Não há release assinado.
 

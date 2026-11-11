@@ -3,6 +3,7 @@ package com.openkiosk.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openkiosk.data.repository.ConfigRepository
+import com.openkiosk.data.repository.PinRepository
 import com.openkiosk.data.repository.PlaylistRepository
 import com.openkiosk.domain.model.KioskConfig
 import com.openkiosk.domain.model.PlaylistItem
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val configRepository: ConfigRepository,
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    private val pinRepository: PinRepository
 ) : ViewModel() {
 
     val config: StateFlow<KioskConfig> = configRepository.observeConfig()
@@ -30,6 +32,17 @@ class SettingsViewModel @Inject constructor(
             configRepository.updateConfig(key, value)
         }
     }
+
+    suspend fun verifyPin(pin: String) = pinRepository.verifyPin(pin)
+
+    suspend fun pinLockoutRemainingMs() = pinRepository.lockoutRemainingMs()
+
+    /** False when a PIN must be chosen first (none set, or still the default 0000). */
+    suspend fun tryEnablePinProtection() = pinRepository.tryEnableProtection()
+
+    suspend fun enablePinProtectionWith(pin: String) = pinRepository.enableProtectionWithPin(pin)
+
+    suspend fun changePin(pin: String) = pinRepository.setPin(pin)
 
     fun addPlaylistItem(url: String, durationSeconds: Int) {
         viewModelScope.launch {

@@ -9,7 +9,7 @@ import com.openkiosk.data.local.entity.PlaylistEntity
 
 @Database(
     entities = [ConfigEntity::class, PlaylistEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -3,6 +3,7 @@ package com.openkiosk.di
 import android.content.Context
 import androidx.room.Room
 import com.openkiosk.data.local.AppDatabase
+import com.openkiosk.data.local.MIGRATION_1_2
 import com.openkiosk.data.local.dao.ConfigDao
 import com.openkiosk.data.local.dao.PlaylistDao
 import dagger.Module
@@ -23,7 +24,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "openkiosk.db"
-        ).build()
+        ).addMigrations(MIGRATION_1_2).build()
     }
 
     @Provides
