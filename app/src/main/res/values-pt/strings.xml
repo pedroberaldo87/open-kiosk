@@ -64,6 +64,9 @@
     <string name="action_remove">Remover</string>
     <string name="action_add_url">Adicionar URL</string>
     <string name="label_url">URL</string>
+    <string name="warning_http_title">Endereço inseguro</string>
+    <string name="warning_http_message">Este endereço usa http:// em um host público. Qualquer pessoa no caminho da rede pode ler ou alterar o que o quiosque exibe. Use https:// se o site oferecer.</string>
+    <string name="action_add_anyway">Adicionar mesmo assim</string>
     <string name="suffix_seconds">%ds</string>
 
     <!-- Language -->
@@ -73,4 +76,8 @@
     <!-- Offline screen -->
     <string name="offline_no_connection">Sem conexão</string>
     <string name="offline_waiting">Aguardando conexão…</string>
+
+    <!-- Blocked page (navigation outside the configured hosts) -->
+    <string name="blocked_title">Endereço não permitido</string>
+    <string name="blocked_message">Este endereço não é permitido pela configuração do quiosque. Para permiti-lo, adicione-o à playlist.</string>
 </resources>

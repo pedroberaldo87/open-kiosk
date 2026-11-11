@@ -215,8 +215,9 @@ adb shell dpm set-device-owner com.openkiosk/.receiver.KioskDeviceAdminReceiver
 ## Rede (o que o APK permite por padrao)
 
 - `app/src/main/res/xml/network_security_config.xml`: `<base-config cleartextTrafficPermitted="true">` com `<certificates src="system" />` — HTTP puro liberado para qualquer host, ancoras de confianca so as do sistema (nenhum CA proprio embutido). [confirmado]
-- Ligado no manifesto por `android:networkSecurityConfig="@xml/network_security_config"`, com `android:usesCleartextTraffic="true"` redundante ao lado. Costura conferida nos dois lados. [confirmado]
-- Consequencia pratica: URL de letreiro em `http://` na rede interna funciona; em contrapartida, nenhuma pagina exibida esta protegida de adulteracao na rede. [inferido]
+- Ligado no manifesto por `android:networkSecurityConfig="@xml/network_security_config"`; o `android:usesCleartextTraffic` redundante foi removido. [confirmado]
+- O arquivo nao expressa faixas de IP nem hosts digitados em tempo de execucao, entao a trava de HTTP puro fica no WebView (`webview/NavigationPolicy.kt`): `http://` so carrega para IP privado (RFC 1918, loopback, link-local), `.local`/`.lan`/`.home.arpa`/`.internal`, nome de um so rotulo, ou host que o dono configurou como `http://`. A navegacao fica restrita aos hosts da URL inicial e da playlist. [confirmado]
+- Consequencia pratica: URL de letreiro em `http://` na rede interna funciona; `http://` para host publico so carrega se o dono o adicionou (o app avisa na hora de adicionar). [confirmado]
 - `android:allowBackup="false"` no manifesto — o backup do Android nao leva a configuracao para outro aparelho. [confirmado]
 
 ## Diagnostico no aparelho

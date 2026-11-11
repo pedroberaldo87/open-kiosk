@@ -3,6 +3,7 @@ package com.openkiosk.presentation.screen
 import android.app.Activity
 import android.content.Context
 import com.openkiosk.data.local.KioskPrefs
+import com.openkiosk.webview.NavigationPolicy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -292,6 +293,30 @@ private fun DurationDropdown(
 private fun AddUrlRow(onAdd: (String, Int) -> Unit) {
     var showInput by remember { mutableStateOf(false) }
     var url by remember { mutableStateOf("") }
+    var showHttpWarning by remember { mutableStateOf(false) }
+
+    if (showHttpWarning) {
+        AlertDialog(
+            onDismissRequest = { showHttpWarning = false },
+            title = { Text(stringResource(R.string.warning_http_title)) },
+            text = { Text(stringResource(R.string.warning_http_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onAdd(url.trim(), 30)
+                        url = ""
+                        showInput = false
+                        showHttpWarning = false
+                    }
+                ) { Text(stringResource(R.string.action_add_anyway)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHttpWarning = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
 
     if (showInput) {
         Row(
@@ -310,9 +335,15 @@ private fun AddUrlRow(onAdd: (String, Int) -> Unit) {
             IconButton(
                 onClick = {
                     if (url.isNotBlank()) {
-                        onAdd(url.trim(), 30)
-                        url = ""
-                        showInput = false
+                        // http:// to a public host can be rewritten by anyone on the network
+                        // path, so the owner has to confirm it. LAN hosts need no warning.
+                        if (NavigationPolicy.isCleartextToPublicHost(url)) {
+                            showHttpWarning = true
+                        } else {
+                            onAdd(url.trim(), 30)
+                            url = ""
+                            showInput = false
+                        }
                     }
                 }
             ) {

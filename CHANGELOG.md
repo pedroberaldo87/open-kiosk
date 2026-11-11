@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+- The kiosk WebView is confined to the hosts of the start URL and playlist (subdomains included).
+  Links, scripted navigation and redirects to other hosts are blocked. A blocked main-frame load
+  shows a local "Address not allowed" page with the blocked host instead of a blank screen, and is
+  not reported as a successful load (no retry loop). Redirects to an SSO host need that host in
+  the playlist
+- Hosts typed with non-ASCII letters (`bücher.example`) are converted to punycode before they
+  join the allowlist, so they keep loading
+- Plain `http://` only loads for private/LAN hosts or hosts the owner added as `http://`;
+  adding an `http://` URL on a public host now asks for confirmation
+- Removed the redundant `android:usesCleartextTraffic` manifest flag
 - PIN protection can no longer be turned on while the PIN is the default `0000`: the switch asks for a different 4-digit PIN first, and the default can no longer be chosen
 - Wrong PIN guesses are rate limited: free tries, then a lockout that starts at 30 s, doubles and is capped at 1 h; the counter is persisted, so closing the dialog or restarting the app does not reset it. Change PIN shares the same limit
 - The PIN is stored as a salted PBKDF2-HMAC-SHA256 hash compared in constant time. Database version 2 migrates an existing plain-text PIN in place, so upgrading keeps your PIN

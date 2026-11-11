@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Cleartext stays permitted at the OS level on purpose: kiosks often show LAN dashboards
+    (Home Assistant, Grafana) over http://, and this file cannot express "private IP ranges" or
+    hosts the owner types in at runtime. The policy is enforced in the WebView instead
+    (see webview/NavigationPolicy.kt): http:// loads only for private/LAN hosts or hosts the
+    owner configured as http://. This file is also the single switch; the redundant
+    android:usesCleartextTraffic manifest flag was removed.
+-->
 <network-security-config>
     <base-config cleartextTrafficPermitted="true">
         <trust-anchors>

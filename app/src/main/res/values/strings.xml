@@ -64,6 +64,9 @@
     <string name="action_remove">Remove</string>
     <string name="action_add_url">Add URL</string>
     <string name="label_url">URL</string>
+    <string name="warning_http_title">Insecure address</string>
+    <string name="warning_http_message">This address uses http:// on a public host. Anyone on the network path can read or change what the kiosk shows. Use https:// if the site supports it.</string>
+    <string name="action_add_anyway">Add anyway</string>
     <string name="suffix_seconds">%ds</string>
 
     <!-- Language -->
@@ -73,4 +76,8 @@
     <!-- Offline screen -->
     <string name="offline_no_connection">No connection</string>
     <string name="offline_waiting">Waiting for connection…</string>
+
+    <!-- Blocked page (navigation outside the configured hosts) -->
+    <string name="blocked_title">Address not allowed</string>
+    <string name="blocked_message">This address is not allowed by the kiosk configuration. To allow it, add it to the playlist.</string>
 </resources>
