@@ -1,5 +1,7 @@
 package com.openkiosk.webview
 
+import java.net.IDN
+
 /**
  * Decides what the kiosk WebView may navigate to and which plain-http requests it may make.
  *
@@ -11,6 +13,8 @@ package com.openkiosk.webview
  *    matches itself and its subdomains; `www.` and the apex are interchangeable. IP literals match
  *    only themselves. Ports are ignored.
  *  - Only http and https are navigable.
+ *  - A configured Unicode host (`bücher.example`) is stored as punycode, the form the WebView
+ *    reports; non-ASCII in a navigation target is refused.
  *  - https is always fine on an allowlisted host. http is fine only for private/LAN hosts
  *    (RFC 1918, loopback, link-local, .local/.lan/... and single-label names) or for hosts the
  *    owner explicitly wrote as `http://` in the configuration. Anything else is a downgrade an
@@ -31,7 +35,7 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
         val all = mutableSetOf<String>()
         val clear = mutableSetOf<String>()
         for (raw in configuredUrls) {
-            val parsed = parseUrl(raw) ?: continue
+            val parsed = parseUrl(raw, configured = true) ?: continue
             if (parsed.scheme != "http" && parsed.scheme != "https") continue
             val base = parsed.host.removePrefix("www.")
             all += base
@@ -102,7 +106,8 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
 
         /** True for an `http://` URL whose host is not private: the owner should be warned. */
         fun isCleartextToPublicHost(url: String): Boolean {
-            val parsed = parseUrl(url) ?: return false
+            // `url` is what the owner typed, so it is parsed like configuration (IDN allowed).
+            val parsed = parseUrl(url, configured = true) ?: return false
             return parsed.scheme == "http" && !isPrivateHost(parsed.host)
         }
 
@@ -128,14 +133,31 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
             return value in 0xfc00..0xfdff || value in 0xfe80..0xfebf
         }
 
-        private fun parseUrl(raw: String): ParsedUrl? {
+        /**
+         * Host of [target] as the policy sees it (lowercase, no trailing dot, no port or
+         * userinfo), or null when the URL does not parse. Used to tell the owner what was blocked.
+         */
+        fun hostOf(target: String): String? = parseUrl(target)?.host
+
+        /**
+         * Parses [raw] into scheme and host.
+         *
+         * [configured] is true for URLs the owner typed (start URL, playlist): a Unicode host such
+         * as `bücher.example` is converted to punycode (`xn--bcher-kva.example`), which is the form
+         * Chromium puts in `request.url`. Targets (what the page asks for) are never converted:
+         * the WebView already canonicalised them, so non-ASCII there stays a parse failure.
+         */
+        private fun parseUrl(raw: String, configured: Boolean = false): ParsedUrl? {
             val match = PREFIX.find(raw.trim()) ?: return null
             val scheme = match.groupValues[1].lowercase()
             val authority = match.groupValues[2]
             // Backslash, whitespace/control and non-ASCII characters are normalised by the browser
             // (a backslash acts as a slash, tabs are dropped, U+3002 becomes a dot), so what we
-            // would compare is not what it would load. Refuse them.
-            if (authority.any { it <= ' ' || it == '\u007f' || it == '\\' || it.code > 0x7e }) return null
+            // would compare is not what it would load. Refuse them. Configured URLs may carry a
+            // Unicode host (converted to punycode below), so non-ASCII is allowed there.
+            if (authority.any { it <= ' ' || it == '\u007f' || it == '\\' || (!configured && it.code > 0x7e) }) {
+                return null
+            }
             // The browser takes the host after the LAST '@'.
             val hostPort = authority.substringAfterLast('@')
             val host: String
@@ -150,11 +172,24 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
                 val colon = hostPort.lastIndexOf(':')
                 val name = if (colon >= 0) hostPort.substring(0, colon) else hostPort
                 if (colon >= 0 && !PORT.matches(hostPort.substring(colon + 1))) return null
-                host = name.lowercase().trimEnd('.')
+                host = normaliseHostName(name, configured) ?: return null
                 if (!HOST_NAME.matches(host) || host.startsWith(".") || host.contains("..")) return null
             }
             if (host.isEmpty()) return null
             return ParsedUrl(scheme, host)
+        }
+
+        /** Lowercase, trailing dot stripped and, for configured hosts, non-ASCII labels as punycode. */
+        private fun normaliseHostName(name: String, configured: Boolean): String? {
+            var host = name.lowercase().trimEnd('.')
+            if (configured && host.any { it.code > 0x7e }) {
+                host = try {
+                    IDN.toASCII(host, IDN.ALLOW_UNASSIGNED).lowercase().trimEnd('.')
+                } catch (e: IllegalArgumentException) {
+                    return null
+                }
+            }
+            return host
         }
     }
 }
