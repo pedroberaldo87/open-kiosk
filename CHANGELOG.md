@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+
+- PIN protection can no longer be turned on while the PIN is the default `0000`: the switch asks for a different 4-digit PIN first, and the default can no longer be chosen
+- Wrong PIN guesses are rate limited: free tries, then a lockout that starts at 30 s, doubles and is capped at 1 h; the counter is persisted, so closing the dialog or restarting the app does not reset it. Change PIN shares the same limit
+- The PIN is stored as a salted PBKDF2-HMAC-SHA256 hash compared in constant time. Database version 2 migrates an existing plain-text PIN in place, so upgrading keeps your PIN
+- The settings drawer is gated on the stored config, not the factory placeholder, so it stays shut until the database has answered
+- PIN protection still ships disabled; that is an owner decision
+
 ### Fixed
 
 - Camera no longer mistakes a global light change for a person: the median frame-to-frame delta is

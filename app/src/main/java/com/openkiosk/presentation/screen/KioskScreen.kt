@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,9 @@ fun KioskScreen(viewModel: KioskViewModel) {
     val isOnline by viewModel.isOnline.collectAsState()
     val needsRefresh by viewModel.needsRefresh.collectAsState()
     val config by viewModel.config.collectAsState()
+    // Nulo ate o Room responder: o portao da gaveta nunca decide pelo valor de fabrica.
+    val realConfig by viewModel.realConfig.collectAsState()
+    val currentRealConfig by rememberUpdatedState(realConfig)
     val screenState by viewModel.screenState.collectAsState()
 
     val settingsViewModel: SettingsViewModel = hiltViewModel()
@@ -60,7 +64,7 @@ fun KioskScreen(viewModel: KioskViewModel) {
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = !showPinDialog && screenState == ScreenState.ACTIVE,
+        gesturesEnabled = !showPinDialog && realConfig != null && screenState == ScreenState.ACTIVE,
         drawerContent = {
             SettingsDrawerContent(
                 viewModel = settingsViewModel,
@@ -105,17 +109,25 @@ fun KioskScreen(viewModel: KioskViewModel) {
         }
     }
 
-    // PIN dialog gate: intercept drawer open gesture (only if PIN enabled)
+    // PIN gate: intercept the drawer open gesture. Keyed on isOpen only, so turning the PIN on
+    // from inside an already-open drawer does not slam it shut. Reads the stored config through
+    // rememberUpdatedState for the same reason.
     LaunchedEffect(drawerState.isOpen) {
-        if (drawerState.isOpen && config.pinEnabled && !pinVerified) {
-            drawerState.close()
-            showPinDialog = true
+        if (!drawerState.isOpen) return@LaunchedEffect
+        when (DrawerGate.decide(currentRealConfig, pinVerified)) {
+            DrawerAccess.OPEN -> Unit
+            DrawerAccess.REQUIRE_PIN -> {
+                drawerState.close()
+                showPinDialog = true
+            }
+            DrawerAccess.BLOCK -> drawerState.close()
         }
     }
 
     if (showPinDialog) {
         PinDialog(
-            correctPin = config.pin,
+            verifyPin = { settingsViewModel.verifyPin(it) },
+            lockoutRemainingMs = { settingsViewModel.pinLockoutRemainingMs() },
             onSuccess = {
                 showPinDialog = false
                 pinVerified = true
