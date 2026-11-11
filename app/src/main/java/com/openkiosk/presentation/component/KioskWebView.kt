@@ -10,12 +10,15 @@ import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.openkiosk.webview.NavigationPolicy
+import java.io.ByteArrayInputStream
 
 private const val TAG = "KioskWebView"
 
@@ -31,10 +34,21 @@ private const val INJECT_JS = """
     })();
 """
 
+// Logs scheme://host only: userinfo, paths and query strings can carry credentials or tokens.
+private fun redact(url: String): String {
+    val schemeEnd = url.indexOf("://")
+    if (schemeEnd < 0) return "?"
+    val authorityEnd = url.indexOfAny(charArrayOf('/', '?', '#'), schemeEnd + 3)
+        .let { if (it < 0) url.length else it }
+    val host = url.substring(schemeEnd + 3, authorityEnd).substringAfterLast('@')
+    return url.substring(0, schemeEnd + 3) + host
+}
+
 @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
 @Composable
 fun KioskWebView(
     url: String,
+    allowedUrls: List<String>,
     onUserInteraction: () -> Unit,
     paused: Boolean,
     modifier: Modifier = Modifier,
@@ -42,6 +56,10 @@ fun KioskWebView(
     onPageLoaded: (() -> Unit)? = null
 ) {
     var webViewKey by remember { mutableIntStateOf(0) }
+
+    // Hosts the owner configured (start URL + playlist) plus the URL being shown. Read through a
+    // State so the live WebView sees playlist edits without being recreated.
+    val navigationPolicy by rememberUpdatedState(NavigationPolicy(allowedUrls + url))
 
     key(webViewKey) {
         // Instancia viva desta chave; vira null assim que for destruida
@@ -97,10 +115,43 @@ fun KioskWebView(
                             return true
                         }
 
+                        // Confines the kiosk to the configured hosts: link taps, scripted
+                        // navigation and server redirects all pass through here. Returning true
+                        // cancels the load and keeps the current page on screen.
                         override fun shouldOverrideUrlLoading(
                             view: WebView?,
                             request: WebResourceRequest?
-                        ): Boolean = false
+                        ): Boolean {
+                            val target = request?.url?.toString() ?: return true
+                            val allowed = navigationPolicy.allowsNavigation(target)
+                            if (!allowed) Log.w(TAG, "Blocked navigation to ${redact(target)}")
+                            return !allowed
+                        }
+
+                        // Second line of defence: main-frame loads that skip the override (the
+                        // first request of loadUrl, some redirects) and plain-http sub-resources
+                        // to hosts that are neither on the LAN nor configured as http by the owner.
+                        override fun shouldInterceptRequest(
+                            view: WebView?,
+                            request: WebResourceRequest?
+                        ): WebResourceResponse? {
+                            val target = request?.url?.toString() ?: return null
+                            val allowed = if (request.isForMainFrame) {
+                                navigationPolicy.allowsNavigation(target)
+                            } else {
+                                navigationPolicy.allowsRequest(target)
+                            }
+                            if (allowed) return null
+                            Log.w(TAG, "Blocked request to ${redact(target)}")
+                            return WebResourceResponse(
+                                "text/plain",
+                                "utf-8",
+                                403,
+                                "Blocked by kiosk policy",
+                                emptyMap(),
+                                ByteArrayInputStream(ByteArray(0))
+                            )
+                        }
                     }
 
                     webChromeClient = object : WebChromeClient() {
