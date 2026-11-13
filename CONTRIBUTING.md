@@ -34,7 +34,11 @@ For large changes or new features, please open an issue first to discuss the app
 ./gradlew lintDebug
 ```
 
-CI runs `testDebugUnitTest`, `lintDebug` and `assembleDebug` on every pull request.
+CI runs `testDebugUnitTest` and `lintDebug` on every pull request. It builds no APK.
+
+### Releases
+
+Builds and releases are always local, never GitHub Actions. The maintainer runs `scripts/release-local.sh <version>`, which runs the tests, builds the APK, writes `SHA256SUMS` and prints the `git tag` and `gh release create --draft` commands (it runs them only with `--publish`). Release builds need the `signing.*` keys in `local.properties`; see the README.
 
 ### Dependency verification
 
