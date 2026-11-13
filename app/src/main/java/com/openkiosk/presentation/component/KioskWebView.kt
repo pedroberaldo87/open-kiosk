@@ -17,9 +17,13 @@ import android.widget.FrameLayout
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.openkiosk.R
 import com.openkiosk.webview.BlockedPage
 import com.openkiosk.webview.NavigationPolicy
+import com.openkiosk.webview.WebSocketGuard
+import com.openkiosk.webview.WebSocketPolicyBridge
 import java.io.ByteArrayInputStream
 import java.util.concurrent.atomic.AtomicReference
 
@@ -234,6 +238,18 @@ fun KioskWebView(
                             onUserInteraction()
                         }
                         false
+                    }
+
+                    // ws:// follows the plain-http rule. Must be in place before the first
+                    // loadUrl so the script runs ahead of the page's own scripts.
+                    if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+                        addJavascriptInterface(
+                            WebSocketPolicyBridge { navigationPolicy },
+                            WebSocketGuard.BRIDGE_NAME
+                        )
+                        WebViewCompat.addDocumentStartJavaScript(this, WebSocketGuard.SCRIPT, setOf("*"))
+                    } else {
+                        Log.w(TAG, "WebView has no document-start scripts: ws:// is not restricted")
                     }
 
                     loadUrl(NavigationPolicy.withDefaultScheme(url))

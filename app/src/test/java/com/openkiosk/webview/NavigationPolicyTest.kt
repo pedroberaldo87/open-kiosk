@@ -358,4 +358,68 @@ class NavigationPolicyTest {
         assertEquals("https://example.com/x", NavigationPolicy.withDefaultScheme("https://example.com/x"))
         assertEquals("about:blank", NavigationPolicy.withDefaultScheme("about:blank"))
     }
+
+    // ---- WebSocket ------------------------------------------------------------------------
+    // The WebView never reports a WebSocket to shouldInterceptRequest; WebSocketGuard asks this
+    // method from the page. ws:// follows the same rule as plain http://.
+
+    @Test
+    fun `wss is allowed to any host`() {
+        val p = policy("https://example.com/")
+        assertTrue(p.allowsWebSocket("wss://example.com/socket"))
+        assertTrue(p.allowsWebSocket("wss://other.example.net/socket"))
+    }
+
+    @Test
+    fun `ws to LAN hosts is allowed`() {
+        val p = policy("http://192.168.1.10:8123/")
+        assertTrue(p.allowsWebSocket("ws://192.168.1.10:8123/api/websocket"))
+        assertTrue(p.allowsWebSocket("ws://homeassistant.local:8123/api/websocket"))
+        assertTrue(p.allowsWebSocket("ws://10.0.0.5/ws"))
+        assertTrue(p.allowsWebSocket("ws://localhost:3000/ws"))
+        assertTrue(p.allowsWebSocket("ws://[fd00::1]/ws"))
+    }
+
+    @Test
+    fun `ws to a public host is blocked even when the host is allowlisted over https`() {
+        val p = policy("https://example.com/")
+        assertFalse(p.allowsWebSocket("ws://example.com/socket"))
+        assertFalse(p.allowsWebSocket("ws://evil.test/socket"))
+        assertFalse(p.allowsWebSocket("ws://198.51.100.7/socket"))
+    }
+
+    @Test
+    fun `ws is allowed to a host the owner typed as http`() {
+        val p = policy("http://example.com/board")
+        assertTrue(p.allowsWebSocket("ws://example.com/socket"))
+        assertTrue(p.allowsWebSocket("ws://live.example.com/socket"))
+        assertFalse(p.allowsWebSocket("ws://example.net/socket"))
+    }
+
+    @Test
+    fun `ws lookalikes of LAN names and numeric tricks are blocked`() {
+        val p = policy("https://example.com/")
+        assertFalse(p.allowsWebSocket("ws://192.168.1.10.evil.test/ws"))
+        assertFalse(p.allowsWebSocket("ws://3232235777/ws"))
+        assertFalse(p.allowsWebSocket("ws://192.168.1.10@evil.test/ws"))
+        assertFalse(p.allowsWebSocket("ws://evil.test\\@192.168.1.10/ws"))
+    }
+
+    @Test
+    fun `http and https forms of a websocket url follow the same rule`() {
+        val p = policy("https://example.com/")
+        assertFalse(p.allowsWebSocket("http://evil.test/socket"))
+        assertTrue(p.allowsWebSocket("http://192.168.1.10/socket"))
+        assertTrue(p.allowsWebSocket("https://evil.test/socket"))
+    }
+
+    @Test
+    fun `websocket urls that do not parse or use other schemes fail closed`() {
+        val p = policy("https://example.com/")
+        assertFalse(p.allowsWebSocket(""))
+        assertFalse(p.allowsWebSocket("ws://"))
+        assertFalse(p.allowsWebSocket("ftp://192.168.1.10/"))
+        assertFalse(p.allowsWebSocket("javascript:alert(1)"))
+        assertFalse(p.allowsWebSocket("ws:/192.168.1.10/ws"))
+    }
 }

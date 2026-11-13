@@ -19,6 +19,7 @@ import java.net.IDN
  *    (RFC 1918, loopback, link-local, .local/.lan/... and single-label names) or for hosts the
  *    owner explicitly wrote as `http://` in the configuration. Anything else is a downgrade an
  *    on-path attacker could rewrite.
+ *  - A page-opened `ws://` WebSocket follows the same rule as http (see [allowsWebSocket]).
  *
  * Every parsing doubt fails closed (blocked), because the WebView normalises URLs in ways a
  * hand-written parser can disagree with.
@@ -62,6 +63,23 @@ class NavigationPolicy(configuredUrls: Collection<String>) {
         if (!target.trimStart().startsWith("http:", ignoreCase = true)) return true
         val parsed = parseUrl(target) ?: return false
         return cleartextAllowedFor(parsed.host)
+    }
+
+    /**
+     * A WebSocket the page wants to open. The WebView never shows WebSockets to
+     * shouldInterceptRequest, so [WebSocketGuard] asks this from inside the page. `ws://` follows
+     * the same rule as plain `http://` (private/LAN host or a host the owner wrote as `http://`);
+     * `wss://` is like https. The `http:` / `https:` forms newer Chromium also accepts in the
+     * WebSocket constructor map to the same two cases. Anything else, or a URL that does not
+     * parse, is refused.
+     */
+    fun allowsWebSocket(target: String): Boolean {
+        val parsed = parseUrl(target) ?: return false
+        return when (parsed.scheme) {
+            "wss", "https" -> true
+            "ws", "http" -> cleartextAllowedFor(parsed.host)
+            else -> false
+        }
     }
 
     private fun cleartextAllowedFor(host: String): Boolean =

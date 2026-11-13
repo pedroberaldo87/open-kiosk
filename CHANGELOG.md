@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   shows a local "Address not allowed" page with the blocked host instead of a blank screen, and is
   not reported as a successful load (no retry loop). Redirects to an SSO host need that host in
   the playlist
+- A WebSocket opened by page script follows the plain-http rule: `ws://` only to private/LAN hosts or hosts the owner added as `http://`, `wss://` unchanged. Enforced by a document-start script that wraps `WebSocket` and asks the app policy; not applied inside Web Workers, and not installed on a WebView without document-start script support. A unit test now pins the network security config and the README wording together
+- Gradle dependency verification: `gradle/verification-metadata.xml` pins SHA-256 for every resolved artifact, so a changed or tampered dependency fails the build
 - Hosts typed with non-ASCII letters (`bücher.example`) are converted to punycode before they
   join the allowlist, so they keep loading
 - Plain `http://` only loads for private/LAN hosts or hosts the owner added as `http://`;
