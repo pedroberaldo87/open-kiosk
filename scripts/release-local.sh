@@ -206,12 +206,9 @@ echo
 echo "Built: $out/$apk_name"
 if [ "$publish" -eq 0 ]; then
   echo "Nothing was tagged or published. To publish, run these (or rerun with --publish):"
-  printf '  %q' "${tag_cmd[@]}"
-  echo
-  printf '  %q' "${push_cmd[@]}"
-  echo
-  printf '  %q' "${release_cmd[@]}"
-  echo
+  echo "  $(printf '%q ' "${tag_cmd[@]}")"
+  echo "  $(printf '%q ' "${push_cmd[@]}")"
+  echo "  $(printf '%q ' "${release_cmd[@]}")"
   exit 0
 fi
 
