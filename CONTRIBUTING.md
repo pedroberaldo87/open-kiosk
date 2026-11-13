@@ -36,6 +36,16 @@ For large changes or new features, please open an issue first to discuss the app
 
 CI runs `testDebugUnitTest`, `lintDebug` and `assembleDebug` on every pull request.
 
+### Dependency verification
+
+`gradle/verification-metadata.xml` pins a SHA-256 for every artifact Gradle downloads, and the build fails if one changes. When you add or upgrade a dependency, Gradle reports the missing checksum; regenerate the file with
+
+```bash
+./gradlew --write-verification-metadata sha256 help assembleDebug testDebugUnitTest lintDebug
+```
+
+and review the diff before committing (check that only the artifacts you expect were added). The generator only records the artifacts for your own OS, so the platform-specific `aapt2` jars (`linux`, `osx`, `windows`) are listed by hand; keep all three when `aapt2` changes (take the checksum from `dl.google.com` and compare it with the published `.sha1`).
+
 ## Code Style
 
 - Follow the [Kotlin official style guide](https://kotlinlang.org/docs/coding-conventions.html)
