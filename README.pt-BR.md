@@ -4,7 +4,7 @@ Navegador de quiosque para Android, de código aberto, feito para tablets fixos 
 
 [English](README.md) · **Português**
 
-[![Build](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/build.yml/badge.svg)](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/build.yml)
+[![Tests](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/tests.yml/badge.svg)](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/tests.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Android API 28+](https://img.shields.io/badge/Android-API%2028%2B-green.svg)](https://developer.android.com/about/versions/pie)
 
@@ -252,13 +252,19 @@ Algumas mensagens de log já estão em português. Aqui estão como aparecem:
 
 ## Desenvolvimento
 
-Estas são as verificações que o CI roda:
+Estas são as verificações que o CI roda (o CI só roda testes; não compila APK):
 
 ```bash
-./gradlew testDebugUnitTest lintDebug assembleDebug
+./gradlew testDebugUnitTest lintDebug
 ```
 
 Os testes unitários ficam em `app/src/test`, rodam na JVM e não precisam de aparelho. Na data desta escrita, os 39 passam, o lint passa, e `assembleDebug` e `assembleRelease` (com assinatura configurada) compilam. Não há testes instrumentados no CI.
+
+### Releases
+
+Os APKs são compilados localmente pelo mantenedor, nunca pelo GitHub Actions, e anexados a um GitHub Release junto com um arquivo `SHA256SUMS`. Para conferir um download, rode `shasum -a 256 -c SHA256SUMS` na pasta com os dois arquivos.
+
+`scripts/release-local.sh <versão>` confere se a versão bate com `versionName` em `app/build.gradle.kts`, roda os testes e o lint, compila o `assembleRelease` com a assinatura do `local.properties`, verifica a assinatura do APK quando o `apksigner` existe e escreve o `SHA256SUMS`. Ele imprime os comandos `git tag`, `git push` e `gh release create --draft`. Com `--publish` ele os executa e cria um **rascunho** de release que você publica à mão. Ainda não existe chave de assinatura de release, então o script para com uma mensagem quando `signing.*` não está configurado; `--debug-apk` compila o `assembleDebug` e marca as notas e o título do release como DEBUG BUILD.
 
 Instruções de compilação, estilo de código e a lista de conferência do PR estão no [CONTRIBUTING.md](CONTRIBUTING.md) (em inglês). Notas para agentes de código estão em [`.claude/CLAUDE.md`](.claude/CLAUDE.md) e [`.claude/docs/`](.claude/docs/) (em português).
 
@@ -268,7 +274,7 @@ Relate vulnerabilidades em particular; veja o [SECURITY.md](SECURITY.md) (em ing
 
 - A proteção por PIN vem desligada (decisão do dono: o PIN não é obrigatório no primeiro uso). Ela não pode ser ligada enquanto o PIN for o antigo padrão 0000. O PIN é guardado como hash PBKDF2-HMAC-SHA256 com sal e os erros são limitados (a partir do quinto erro, bloqueio que começa em 30 s, dobra e tem teto de 1 h; vale depois de reiniciar). Continua sendo uma trava de 4 dígitos para a gaveta, não uma barreira de segurança.
 - O WebView só navega para os hosts da URL inicial e da playlist (subdomínios incluídos); links e redirecionamentos para outros hosts são bloqueados, e o quiosque mostra então uma página local "Endereço não permitido" com o host bloqueado. Se a sua página faz login por outro host (SSO do Google ou da Microsoft, um provedor OAuth) ou redireciona para outro nome, adicione esse host como item da playlist. Adicione o host mais específico que precisar: o domínio raiz de uma hospedagem compartilhada libera todos os sites dentro dele. Um host escrito com acentos ou outras letras não latinas (por exemplo `bücher.example`) é comparado pela forma punycode. `http://` puro só carrega para hosts privados/de rede local (RFC 1918, loopback, link-local, `.local`, `.lan`, nomes de um só rótulo) ou para hosts que você mesmo adicionou como `http://` (o app avisa ao adicionar um em host público). Um WebSocket aberto pela página segue a mesma regra: `ws://` só para esses hosts, `wss://` sempre liberado, e um `ws://` bloqueado gera um `SecurityError` na página. A configuração de rede do sistema ainda permite HTTP puro, porque ela não expressa faixas de IP nem hosts digitados em tempo de execução; a regra acima é aplicada dentro do app, e um teste unitário falha se a configuração e esta descrição se afastarem. A checagem de WebSocket é um script que o app injeta antes dos scripts da própria página (exige um WebView com suporte a scripts de início de documento; se não houver, o app registra um aviso e deixa os WebSockets sem restrição). Ela cobre a página e seus frames, não um WebSocket aberto num Web Worker nem num frame em branco que a própria página cria; trate como uma guarda para a página que você escolheu, não como uma caixa de areia contra script hostil. Use HTTPS para qualquer coisa sensível.
-- O CI compila e publica só um APK de debug. Não há release assinado.
+- Ainda não há release assinado. Os APKs de release são compilados localmente pelo mantenedor (veja Releases acima); até existir uma chave de assinatura de release, um APK publicado seria um build de debug, marcado como tal.
 
 ## Contribuindo
 

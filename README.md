@@ -4,7 +4,7 @@ Open-source Android kiosk browser for wall-mounted tablets and digital signage: 
 
 **English** · [Português](README.pt-BR.md)
 
-[![Build](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/build.yml/badge.svg)](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/build.yml)
+[![Tests](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/tests.yml/badge.svg)](https://github.com/pedroberaldo87/open-kiosk/actions/workflows/tests.yml)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Android API 28+](https://img.shields.io/badge/Android-API%2028%2B-green.svg)](https://developer.android.com/about/versions/pie)
 
@@ -250,13 +250,19 @@ Some log messages are in Portuguese. They are quoted here as they appear:
 
 ## Development
 
-These are the checks CI runs:
+These are the checks CI runs (CI only runs tests; it builds no APK):
 
 ```bash
-./gradlew testDebugUnitTest lintDebug assembleDebug
+./gradlew testDebugUnitTest lintDebug
 ```
 
 The unit tests live in `app/src/test`, run on the JVM and need no device. At the time of writing, all 39 pass, lint passes, and `assembleDebug` and `assembleRelease` (with a signing config) both build. There are no instrumented tests in CI.
+
+### Releases
+
+APKs are built locally by the maintainer, never by GitHub Actions, and attached to a GitHub Release together with a `SHA256SUMS` file. To check a download, run `shasum -a 256 -c SHA256SUMS` in the folder with both files.
+
+`scripts/release-local.sh <version>` checks that the version matches `versionName` in `app/build.gradle.kts`, runs the tests and lint, builds `assembleRelease` with the signing config from `local.properties`, verifies the APK signature when `apksigner` is available and writes `SHA256SUMS`. It prints the `git tag`, `git push` and `gh release create --draft` commands. With `--publish` it runs them and creates a **draft** release that you publish by hand. There is no release signing key yet, so the script stops with a message when `signing.*` is not configured; `--debug-apk` builds `assembleDebug` instead and marks the release notes and title as a DEBUG BUILD.
 
 Build instructions, code style and the PR checklist are in [CONTRIBUTING.md](CONTRIBUTING.md). Notes for coding agents are in [`.claude/CLAUDE.md`](.claude/CLAUDE.md) and [`.claude/docs/`](.claude/docs/) (in Portuguese).
 
@@ -266,7 +272,7 @@ Please report vulnerabilities privately; see [SECURITY.md](SECURITY.md). Known l
 
 - PIN protection is off by default (an owner decision: the PIN is not mandatory on first run). It cannot be turned on while the PIN is the old default 0000. The PIN is stored as a salted PBKDF2-HMAC-SHA256 hash and wrong guesses are rate limited (from the fifth wrong guess, a lockout that starts at 30 s, doubles and is capped at 1 h; it survives restarts). It is still a 4-digit lock for the settings drawer, not a security boundary.
 - The WebView only navigates to the hosts of your start URL and playlist (subdomains included); links and redirects to other hosts are blocked, and the kiosk then shows a local "Address not allowed" page with the blocked host. If your page signs in through another host (Google or Microsoft SSO, an OAuth provider) or redirects to another name, add that host as a playlist entry. Add the narrowest host you need: a shared-hosting apex opens every site under it. A host written with accents or other non-Latin letters (for example `bücher.example`) is matched through its punycode form. Plain `http://` loads only for private/LAN hosts (RFC 1918, loopback, link-local, `.local`, `.lan`, single-label names) or for hosts you added as `http://` yourself (the app warns when you add one on a public host). A WebSocket opened by the page follows the same rule: `ws://` is allowed for those hosts only, `wss://` is always allowed, and a blocked `ws://` throws a `SecurityError` in the page. The OS-level network security config still permits cleartext, because it cannot express IP ranges or hosts typed in at runtime; the rule above is enforced inside the app, and a unit test fails if the config and this description drift apart. The WebSocket check is a script the app injects before the page's own scripts (it needs a WebView with document-start script support; the app logs a warning and leaves WebSockets unrestricted if the WebView has none). It covers the page and its frames, not a WebSocket opened from a Web Worker or from a blank frame the page creates itself, so treat it as a guard for the page you chose, not a sandbox for hostile script. Use HTTPS for anything sensitive.
-- CI builds and uploads only a debug APK. There is no signed release.
+- There is no signed release yet. Release APKs are built locally by the maintainer (see Releases above); until a release signing key exists, a published APK would be a debug build, marked as such.
 
 ## Contributing
 
