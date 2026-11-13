@@ -71,6 +71,8 @@ if [ -z "${ANDROID_HOME:-}" ] && [ -d "$HOME/Library/Android/sdk" ]; then
 fi
 [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ] || die "no JDK 17: set JAVA_HOME"
 [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME" ] || die "no Android SDK: set ANDROID_HOME"
+# Non-interactive shells (ssh) often lack the Homebrew prefix in PATH.
+if [ -d /opt/homebrew/bin ]; then PATH="$PATH:/opt/homebrew/bin"; fi
 for tool in git shasum; do
   command -v "$tool" >/dev/null || die "missing tool: $tool"
 done
