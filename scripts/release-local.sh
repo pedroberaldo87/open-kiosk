@@ -125,8 +125,13 @@ else
     [ -n "$(prop "$key")" ] || missing="$missing $key"
   done
   store_file="$(prop signing.storeFile)"
-  if [ -z "$missing" ] && [ ! -f "app/$store_file" ]; then
-    missing=" signing.storeFile (app/$store_file does not exist)"
+  # Gradle resolves storeFile from app/ unless it is absolute (keep the key outside the repo).
+  case "$store_file" in
+    /*) store_path="$store_file" ;;
+    *) store_path="app/$store_file" ;;
+  esac
+  if [ -z "$missing" ] && [ ! -f "$store_path" ]; then
+    missing=" signing.storeFile ($store_path does not exist)"
   fi
   if [ -n "$missing" ]; then
     cat >&2 <<MSG
