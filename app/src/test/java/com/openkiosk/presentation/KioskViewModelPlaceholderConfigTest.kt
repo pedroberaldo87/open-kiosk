@@ -1,6 +1,7 @@
 package com.openkiosk.presentation
 
 import com.openkiosk.data.repository.ConfigRepository
+import com.openkiosk.diagnostics.ConnectionLog
 import com.openkiosk.domain.PlaylistManager
 import com.openkiosk.domain.model.KioskConfig
 import com.openkiosk.domain.model.PlaylistItem
@@ -68,7 +69,8 @@ class KioskViewModelPlaceholderConfigTest {
             motionDetectionManager,
             sensorWakeManager,
             powerStateMonitor,
-            playlistManager
+            playlistManager,
+            mock<ConnectionLog>()
         )
 
         configFlow.tryEmit(KioskConfig(deepSleepEnabled = true))

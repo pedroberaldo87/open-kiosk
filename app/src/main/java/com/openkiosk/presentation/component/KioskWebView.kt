@@ -21,6 +21,7 @@ import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.openkiosk.R
 import com.openkiosk.webview.BlockedPage
+import com.openkiosk.webview.MainFrameLoad
 import com.openkiosk.webview.NavigationPolicy
 import com.openkiosk.webview.WebSocketGuard
 import com.openkiosk.webview.WebSocketPolicyBridge
@@ -59,8 +60,9 @@ fun KioskWebView(
     onUserInteraction: () -> Unit,
     paused: Boolean,
     modifier: Modifier = Modifier,
-    onError: (() -> Unit)? = null,
-    onPageLoaded: (() -> Unit)? = null
+    onError: ((code: Int, description: String, url: String) -> Unit)? = null,
+    onPageLoaded: (() -> Unit)? = null,
+    onRenderGone: ((crashed: Boolean) -> Unit)? = null
 ) {
     var webViewKey by remember { mutableIntStateOf(0) }
 
@@ -92,13 +94,21 @@ fun KioskWebView(
                     // Main-frame URL the policy refused and answered with the local blocked page.
                     // Written on the IO thread of shouldInterceptRequest, read on the UI thread.
                     val blockedMainFrame = AtomicReference<String?>(null)
+                    val mainFrameLoad = MainFrameLoad()
 
                     webViewClient = object : WebViewClient() {
+                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                            mainFrameLoad.started()
+                        }
+
                         override fun onPageFinished(view: WebView?, url: String?) {
                             // The blocked page is a finished load, but not a successful one: do not
                             // report success to the recovery manager, and do not report an error
                             // either, because retrying the same refused URL would reload forever.
                             if (url != null && url == blockedMainFrame.get()) return
+                            // A pagina de erro tambem "termina": avisar sucesso aqui cancelaria a
+                            // nova tentativa que o erro acabou de agendar.
+                            if (!mainFrameLoad.finishedOk()) return
                             view?.evaluateJavascript(INJECT_JS, null)
                             onPageLoaded?.invoke()
                         }
@@ -110,7 +120,12 @@ fun KioskWebView(
                         ) {
                             if (request?.isForMainFrame == true) {
                                 Log.e(TAG, "WebView error: ${error?.description} (code: ${error?.errorCode})")
-                                onError?.invoke()
+                                mainFrameLoad.failed()
+                                onError?.invoke(
+                                    error?.errorCode ?: 0,
+                                    error?.description?.toString() ?: "",
+                                    redact(request?.url?.toString() ?: "")
+                                )
                             }
                         }
 
@@ -119,6 +134,7 @@ fun KioskWebView(
                             detail: android.webkit.RenderProcessGoneDetail?
                         ): Boolean {
                             Log.e(TAG, "Render process gone, crash=${detail?.didCrash()}, priority=${detail?.rendererPriorityAtExit()}")
+                            onRenderGone?.invoke(detail?.didCrash() == true)
                             // Contrato do Android: a instancia morta tem que sair da
                             // hierarquia E ser destruida, senao o app cai junto.
                             webViewRef.value = null

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.openkiosk.data.repository.ConfigRepository
 import com.openkiosk.data.repository.PinRepository
 import com.openkiosk.data.repository.PlaylistRepository
+import com.openkiosk.diagnostics.ConnectionLog
 import com.openkiosk.domain.model.KioskConfig
 import com.openkiosk.domain.model.PlaylistItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,12 +15,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// Cabe na gaveta sem rolar demais e cobre algumas quedas seguidas com as voltas.
+private const val CONNECTION_EVENTS_SHOWN = 30
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val configRepository: ConfigRepository,
     private val playlistRepository: PlaylistRepository,
-    private val pinRepository: PinRepository
+    private val pinRepository: PinRepository,
+    private val connectionLog: ConnectionLog
 ) : ViewModel() {
+
+    val connectionLogVersion: StateFlow<Int> = connectionLog.version
+
+    fun recentConnectionEvents(): List<String> = connectionLog.recent(CONNECTION_EVENTS_SHOWN)
 
     val config: StateFlow<KioskConfig> = configRepository.observeConfig()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KioskConfig())

@@ -164,6 +164,18 @@ fun SettingsDrawerContent(
 
             SectionDivider()
 
+            // CONNECTION LOG Section
+            SectionHeader(
+                icon = { Icon(Icons.Default.Info, contentDescription = null) },
+                title = stringResource(R.string.section_connection_log)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            val logVersion by viewModel.connectionLogVersion.collectAsState()
+            val events = remember(logVersion) { viewModel.recentConnectionEvents() }
+            ConnectionLogSection(events)
+
+            SectionDivider()
+
             // SOBRE Section
             SectionHeader(
                 icon = { Icon(Icons.Default.Info, contentDescription = null) },
@@ -202,6 +214,21 @@ private fun SectionHeader(icon: @Composable () -> Unit, title: String) {
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+private fun ConnectionLogSection(events: List<String>) {
+    if (events.isEmpty()) {
+        Text(
+            stringResource(R.string.connection_log_empty),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        return
+    }
+    events.forEach { line ->
+        Text(line, style = MaterialTheme.typography.bodySmall)
     }
 }
 

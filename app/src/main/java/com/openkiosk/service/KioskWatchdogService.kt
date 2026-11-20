@@ -18,6 +18,11 @@ import android.os.Process
 import android.provider.Settings
 import android.util.Log
 import com.openkiosk.R
+import com.openkiosk.diagnostics.ConnectionLog
+import dagger.hilt.android.AndroidEntryPoint
+import java.io.FileDescriptor
+import java.io.PrintWriter
+import javax.inject.Inject
 import com.openkiosk.domain.model.ScreenState
 import com.openkiosk.presentation.MainActivity
 import com.openkiosk.sleep.wakesScreenOnLaunch
@@ -87,7 +92,11 @@ internal fun lockscreenAdIsOn(value: String?): Boolean = value != "0"
  * Serviço em primeiro plano que prende o processo (START_STICKY) e, a cada tick,
  * traz a MainActivity de volta se algo a cobriu (lockscreen de propaganda do Fire).
  */
+@AndroidEntryPoint
 class KioskWatchdogService : Service() {
+
+    @Inject
+    lateinit var connectionLog: ConnectionLog
 
     private val handler = Handler(Looper.getMainLooper())
 
@@ -169,6 +178,7 @@ class KioskWatchdogService : Service() {
 
     private fun restartProcess(graphicsKb: Long) {
         Log.w(TAG, "memória de vídeo em $graphicsKb KB com a tela apagada — reiniciando o processo")
+        connectionLog.record("process restart (graphics memory $graphicsKb KB)")
         val relaunch = PendingIntent.getActivity(
             this, 1, mainActivityIntent(),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -244,6 +254,14 @@ class KioskWatchdogService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    // Leitura do registro de conexao pelo cabo, do mais antigo ao mais novo:
+    //   adb shell dumpsys activity service com.openkiosk/.service.KioskWatchdogService
+    // O Fire nega ao adb a pasta do app e o app de producao nao e depuravel; o dump do servico
+    // e o caminho que sobra, e o sistema so o entrega a quem tem permissao de DUMP (o adb tem).
+    override fun dump(fd: FileDescriptor?, writer: PrintWriter, args: Array<out String>?) {
+        connectionLog.recent(Int.MAX_VALUE).asReversed().forEach(writer::println)
+    }
 
     companion object {
         fun start(context: Context) {

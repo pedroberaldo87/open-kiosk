@@ -341,6 +341,26 @@ WebViewClient.onPageFinished
   → KioskViewModel.onWebViewPageLoaded() → recoveryManager.onSuccess() → retryCount = 0
 ```
 
+- A página de erro do WebView também dispara `onPageFinished`. `MainFrameLoad` (em
+  `webview/MainFrameLoad.kt`) marca a carga como falha no `onReceivedError` e o fim dela não vira
+  sucesso — antes, esse fim chamava `recoveryManager.onSuccess()` e cancelava a nova tentativa
+  recém-agendada: "Scheduling retry #1" duas vezes e nenhum "Retry triggered", tela presa em
+  "Webpage not available" (medido no Fire em 2026-11-20) [confirmado; `MainFrameLoadTest`].
+- A pausa (`detachActivity` → `recoveryManager.stop()`) cancela a tentativa agendada, e o aviso
+  "a internet voltou" só chega com o app na frente. `attachActivity` recarrega se a última carga
+  falhou (`lastLoadFailed`) [confirmado no aparelho: erro → tela apagada → Wi-Fi religado →
+  acordar → página de volta em 2 s; `KioskViewModelRetryOnResumeTest`].
+
+### Registro de conexão
+
+- `diagnostics/ConnectionLog.kt` grava em `filesDir/connection-log.txt` (teto de 256 KB + uma
+  cópia `.1`): erro de página com código e domínio, página carregou/recuperou, rede perdida e
+  disponível, nova tentativa, app na frente/pausado, renderizador morto, reinício por memória de
+  vídeo. Existe porque o logcat do Fire guarda só ~2 min.
+- Leitura pelo cabo (o Fire nega ao adb até `/sdcard/Android/data/<pacote>`):
+  `adb shell dumpsys activity service com.openkiosk/.service.KioskWatchdogService`
+  [confirmado em 2026-11-20]. Na tela: seção "Registro de conexão" da gaveta, últimas 30 linhas.
+
 ### Renderizador morto
 
 ```
