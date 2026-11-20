@@ -1,6 +1,6 @@
 ---
-generated: 2026-10-27
-generated-commit: 9130597
+generated: 2026-11-20
+generated-commit: 1a6c0d1
 project: open-kiosk
 scope:
   - app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt
@@ -29,7 +29,7 @@ verified-by: |
   adb logcat -s ScreenState:D MotionDetection:D KioskWatchdog:D KioskViewModel:D PowerState:D WebViewRecoveryManager:D
   Estado guardado entre mortes do processo:
   adb shell run-as com.openkiosk cat /data/data/com.openkiosk/shared_prefs/open_kiosk_prefs.xml
-doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#3dc233f5
+doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#d8a5c954
 ---
 
 # Caminhos de execução
