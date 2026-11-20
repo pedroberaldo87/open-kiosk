@@ -1,10 +1,10 @@
 ---
-generated: 2026-10-27
-generated-commit: 9130597
+generated: 2026-11-20
+generated-commit: 86a29f4
 project: open-kiosk
-scope: [app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt, app/src/main/java/com/openkiosk/presentation/viewmodel/KioskViewModel.kt, app/src/main/java/com/openkiosk/service/KioskWatchdogService.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt, app/src/main/java/com/openkiosk/kiosk/KioskLockManager.kt, app/src/main/java/com/openkiosk/domain/PlaylistManager.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/presentation/MainActivity.kt, app/src/main/java/com/openkiosk/power/PowerStateMonitor.kt, app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt, app/src/main/java/com/openkiosk/receiver/BootReceiver.kt, app/src/main/java/com/openkiosk/receiver/KioskDeviceAdminReceiver.kt, app/src/main/java/com/openkiosk/OpenKioskApplication.kt, app/src/main/AndroidManifest.xml, app/src/main/java/com/openkiosk/domain/model/ScreenState.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt, app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt]
+scope: [app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt, app/src/main/java/com/openkiosk/presentation/viewmodel/KioskViewModel.kt, app/src/main/java/com/openkiosk/service/KioskWatchdogService.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt, app/src/main/java/com/openkiosk/kiosk/KioskLockManager.kt, app/src/main/java/com/openkiosk/domain/PlaylistManager.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/presentation/MainActivity.kt, app/src/main/java/com/openkiosk/power/PowerStateMonitor.kt, app/src/main/java/com/openkiosk/presentation/screen/KioskScreen.kt, app/src/main/java/com/openkiosk/receiver/BootReceiver.kt, app/src/main/java/com/openkiosk/receiver/KioskDeviceAdminReceiver.kt, app/src/main/java/com/openkiosk/OpenKioskApplication.kt, app/src/main/AndroidManifest.xml, app/src/main/java/com/openkiosk/domain/model/ScreenState.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt, app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/di/DiagnosticsModule.kt]
 verified-by: "./gradlew testDebugUnitTest (14 arquivos de teste: ls app/src/test/java/com/openkiosk/*/*.kt | wc -l = 14); no aparelho, adb logcat -s ScreenState:D KioskViewModel:D MotionDetection:D KioskWatchdog:D PowerState:D mostra cada transicao e cada decisao de sensor"
-doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#6bf9b779
+doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#2bd554fb
 ---
 
 # Arquitetura — OPEN-KIOSK
@@ -60,7 +60,9 @@ receiver/     BootReceiver, KioskDeviceAdminReceiver
 
 - [confirmado] Raiz: `OpenKioskApplication` anotada `@HiltAndroidApp`, corpo vazio — o
   arquivo tem 7 linhas e nada alem da anotacao.
-- [confirmado] Unico modulo Hilt do projeto e `di/DatabaseModule.kt`, `@InstallIn(SingletonComponent::class)`:
+- [confirmado] Dois modulos Hilt, ambos `@InstallIn(SingletonComponent::class)` (`grep -rln "@Module" --include="*.kt" app/src/main/java`):
+  `di/DiagnosticsModule.kt` entrega o `ConnectionLog` singleton em `filesDir/connection-log.txt`;
+  `di/DatabaseModule.kt` monta o banco:
 
 ```kotlin
 Room.databaseBuilder(context, AppDatabase::class.java, "openkiosk.db").build()
@@ -76,23 +78,28 @@ Room.databaseBuilder(context, AppDatabase::class.java, "openkiosk.db").build()
 
 ```
 power/PowerStateMonitor.kt
-di/DatabaseModule.kt
+sensors/SensorWakeManager.kt
 sensors/MotionDetectionManager.kt
+di/DiagnosticsModule.kt
 sleep/ScreenStateManager.kt
+di/DatabaseModule.kt
 kiosk/KioskLockManager.kt
 data/repository/PlaylistRepository.kt
+data/repository/PinRepository.kt
 data/repository/ConfigRepository.kt
-sensors/SensorWakeManager.kt
 domain/PlaylistManager.kt
 ```
 
-- [confirmado] `KioskViewModel` e `@HiltViewModel`; recebe sete dependencias no construtor
+- [confirmado] `KioskViewModel` e `@HiltViewModel`; recebe oito dependencias no construtor
   (`ConfigRepository`, `ScreenStateManager`, `KioskLockManager`, `MotionDetectionManager`,
-  `SensorWakeManager`, `PowerStateMonitor`, `PlaylistManager`). `PlaylistManager` e o unico
+  `SensorWakeManager`, `PowerStateMonitor`, `PlaylistManager`, `ConnectionLog`). `PlaylistManager` e o unico
   publico (`val playlistManager`), porque a tela precisa chamar `next()`/`previous()`.
 - [confirmado] `WebViewRecoveryManager` NAO e injetado: nasce como campo da ViewModel
   (`val recoveryManager = WebViewRecoveryManager()`). E o unico gerente cuja vida acompanha
   a ViewModel, nao o processo.
+- [confirmado] Pontos de entrada Hilt (`grep -rn "@AndroidEntryPoint"`): `MainActivity` e
+  `KioskWatchdogService` — o vigia injeta o `ConnectionLog` para gravar o reinicio por memoria
+  de video e para entregar o registro no `dump()`.
 
 ### Por que os gerentes sao singleton e a ViewModel nao
 
@@ -334,6 +341,11 @@ internal fun relaunchDelayMs(consecutiveMisses: Int): Long =
     devolve (detalhe e medicoes em **patterns.md**). Testado no aparelho com teto baixo: 6
     reinicios, estado `DEEP_SLEEP` mantido; entre a morte e a volta a tela inicial da Amazon
     chegou a aparecer numa amostra.
+- [confirmado] O vigia e tambem a porta de leitura do registro de conexao pelo cabo:
+  `KioskWatchdogService :: dump` imprime `connectionLog.recent(Int.MAX_VALUE)` do mais antigo ao
+  mais novo, via `adb shell dumpsys activity service com.openkiosk/.service.KioskWatchdogService`.
+  Existe porque o Fire nega ao adb a pasta do app (ate a externa) e o app de producao nao e
+  depuravel [confirmado no aparelho em 2026-11-20].
 - [confirmado] Aviso plantado para o futuro: em `onCreate`, se `SDK_INT >= 34` e
   `!manager.canUseFullScreenIntent()`, o servico loga "USE_FULL_SCREEN_INTENT nao concedida
   — relance degradado a banner". O comentario diz que no Fire atual isso nao morde.
@@ -408,6 +420,15 @@ CONTINUOUS_POLLING_MS = 200L
 - [confirmado] `startAutoRefresh` retorna cedo quando `autoRefreshIntervalMs <= 0L`, com o
   comentario: "Desativado" no menu chega como 0, e agendar com atraso 0 seria recarga em laco
   continuo — o oposto de desligar.
+- [confirmado] O fim de carga da pagina de ERRO nao conta como sucesso: `KioskWebView` marca
+  `MainFrameLoad.failed()` no `onReceivedError` do quadro principal e `onPageFinished` so avisa
+  `onPageLoaded` se `finishedOk()`. Antes, o `onSuccess()` desse fim cancelava a tentativa
+  recem-agendada e a tela ficava presa em "Webpage not available" (medido em 2026-11-20).
+- [confirmado] `KioskViewModel` guarda `lastLoadFailed` (liga no erro, desliga no sucesso);
+  `attachActivity` recarrega se ele estiver ligado, porque `detachActivity` cancela a tentativa
+  agendada e o aviso de rede de volta so chega com o app na frente.
+- [confirmado] Cada erro, tentativa, recuperacao, rede perdida/disponivel e pausa/volta vai para
+  o `ConnectionLog` (fluxo completo no doc de caminhos de execucao, caminho 6).
 - [confirmado] A tela nao conhece nada disso: a ViewModel so vira `_needsRefresh` para `true`,
   e `KioskScreen` reage incrementando `refreshKey`, que reconstroi o `KioskWebView` dentro de
   `androidx.compose.runtime.key(refreshKey)`.

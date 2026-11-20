@@ -87,8 +87,9 @@ fun KioskScreen(viewModel: KioskViewModel) {
                         paused = screenState == ScreenState.SLEEP ||
                             screenState == ScreenState.DEEP_SLEEP,
                         modifier = Modifier.fillMaxSize(),
-                        onError = { viewModel.onWebViewError() },
-                        onPageLoaded = { viewModel.onWebViewPageLoaded() }
+                        onError = { code, description, url -> viewModel.onWebViewError(code, description, url) },
+                        onPageLoaded = { viewModel.onWebViewPageLoaded() },
+                        onRenderGone = { crashed -> viewModel.onRenderGone(crashed) }
                     )
                 }
             }

@@ -9,6 +9,8 @@
     <string name="section_kiosk">KIOSK</string>
     <string name="section_language">IDIOMA</string>
     <string name="section_about">ACERCA DE</string>
+    <string name="section_connection_log">REGISTRO DE CONEXIÓN</string>
+    <string name="connection_log_empty">Aún no hay eventos registrados</string>
 
     <!-- Settings: About -->
     <string name="about_version">Open Kiosk v%s</string>

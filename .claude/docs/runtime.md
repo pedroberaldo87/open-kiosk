@@ -1,6 +1,6 @@
 ---
-generated: 2026-10-27
-generated-commit: 9130597
+generated: 2026-11-20
+generated-commit: 86a29f4
 project: open-kiosk
 scope:
   - app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt
@@ -22,6 +22,8 @@ scope:
   - app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt
   - app/src/main/java/com/openkiosk/presentation/viewmodel/SettingsViewModel.kt
   - app/src/main/AndroidManifest.xml
+  - app/src/main/java/com/openkiosk/webview/MainFrameLoad.kt
+  - app/src/main/java/com/openkiosk/diagnostics/ConnectionLog.kt
 verified-by: |
   Testes de unidade: ./gradlew :app:testDebugUnitTest
   (14 arquivos de teste — `ls app/src/test/java/com/openkiosk/*/*.kt | wc -l` → 14)
@@ -29,7 +31,7 @@ verified-by: |
   adb logcat -s ScreenState:D MotionDetection:D KioskWatchdog:D KioskViewModel:D PowerState:D WebViewRecoveryManager:D
   Estado guardado entre mortes do processo:
   adb shell run-as com.openkiosk cat /data/data/com.openkiosk/shared_prefs/open_kiosk_prefs.xml
-doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#3dc233f5
+doc-sig: open-kiosk/ScreenStateManager.kt@gen=3.8#d8a5c954
 ---
 
 # Caminhos de execução
@@ -340,6 +342,26 @@ WebViewClient.onPageFinished
   → evaluateJavascript(INJECT_JS)     // esconde barra de rolagem e desliga seleção de texto
   → KioskViewModel.onWebViewPageLoaded() → recoveryManager.onSuccess() → retryCount = 0
 ```
+
+- A página de erro do WebView também dispara `onPageFinished`. `MainFrameLoad` (em
+  `webview/MainFrameLoad.kt`) marca a carga como falha no `onReceivedError` e o fim dela não vira
+  sucesso — antes, esse fim chamava `recoveryManager.onSuccess()` e cancelava a nova tentativa
+  recém-agendada: "Scheduling retry #1" duas vezes e nenhum "Retry triggered", tela presa em
+  "Webpage not available" (medido no Fire em 2026-11-20) [confirmado; `MainFrameLoadTest`].
+- A pausa (`detachActivity` → `recoveryManager.stop()`) cancela a tentativa agendada, e o aviso
+  "a internet voltou" só chega com o app na frente. `attachActivity` recarrega se a última carga
+  falhou (`lastLoadFailed`) [confirmado no aparelho: erro → tela apagada → Wi-Fi religado →
+  acordar → página de volta em 2 s; `KioskViewModelRetryOnResumeTest`].
+
+### Registro de conexão
+
+- `diagnostics/ConnectionLog.kt` grava em `filesDir/connection-log.txt` (teto de 256 KB + uma
+  cópia `.1`): erro de página com código e domínio, página carregou/recuperou, rede perdida e
+  disponível, nova tentativa, app na frente/pausado, renderizador morto, reinício por memória de
+  vídeo. Existe porque o logcat do Fire guarda só ~2 min.
+- Leitura pelo cabo (o Fire nega ao adb até `/sdcard/Android/data/<pacote>`):
+  `adb shell dumpsys activity service com.openkiosk/.service.KioskWatchdogService`
+  [confirmado em 2026-11-20]. Na tela: seção "Registro de conexão" da gaveta, últimas 30 linhas.
 
 ### Renderizador morto
 

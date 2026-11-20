@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openkiosk.data.repository.ConfigRepository
+import com.openkiosk.diagnostics.ConnectionLog
 import com.openkiosk.domain.PlaylistManager
 import com.openkiosk.domain.model.KioskConfig
 import com.openkiosk.domain.model.PlaylistItem
@@ -38,7 +39,8 @@ class KioskViewModel @Inject constructor(
     private val motionDetectionManager: MotionDetectionManager,
     private val sensorWakeManager: SensorWakeManager,
     private val powerStateMonitor: PowerStateMonitor,
-    val playlistManager: PlaylistManager
+    val playlistManager: PlaylistManager,
+    private val connectionLog: ConnectionLog
 ) : ViewModel() {
 
     // Eagerly: o collect abaixo le o repositorio direto, entao esse stateIn deixou de ter
@@ -71,6 +73,9 @@ class KioskViewModel @Inject constructor(
     private var lifecycleOwnerRef: WeakReference<LifecycleOwner>? = null
     private var activityRef: WeakReference<Activity>? = null
     private var cameraPermissionGranted = false
+
+    // A pagina na tela e a de erro. Sobrevive a pausa, ao contrario da nova tentativa agendada.
+    private var lastLoadFailed = false
 
     init {
         playlistManager.start(viewModelScope)
@@ -154,6 +159,14 @@ class KioskViewModel @Inject constructor(
         // Start connectivity monitoring
         startConnectivityMonitoring(activity)
 
+        connectionLog.record("app in front")
+        // A pausa cancelou a nova tentativa, e o aviso "a internet voltou" so chega com o app na
+        // frente: sem recarregar aqui, a tela de erro ficava presa ate a proxima queda.
+        if (lastLoadFailed) {
+            connectionLog.record("page was in error, retrying")
+            _needsRefresh.value = true
+        }
+
         // Religa o cronometro de sono a partir do estado de tela atual — voltar do
         // onResume nao e presenca de usuario, so toque/sensor/camera acendem a tela
         screenStateManager.resumeTimers()
@@ -173,6 +186,7 @@ class KioskViewModel @Inject constructor(
     }
 
     fun detachActivity() {
+        connectionLog.record("app paused")
         lifecycleOwnerRef = null
         activityRef = null
         screenStateManager.detachActivity()
@@ -186,14 +200,23 @@ class KioskViewModel @Inject constructor(
         _needsRefresh.value = false
     }
 
-    fun onWebViewError() {
+    fun onWebViewError(code: Int, description: String, url: String) {
+        lastLoadFailed = true
+        connectionLog.record("page error $code $description ($url)")
         recoveryManager.onError {
+            connectionLog.record("retrying page")
             _needsRefresh.value = true
         }
     }
 
     fun onWebViewPageLoaded() {
+        connectionLog.record(if (lastLoadFailed) "page loaded (recovered)" else "page loaded")
+        lastLoadFailed = false
         recoveryManager.onSuccess()
+    }
+
+    fun onRenderGone(crashed: Boolean) {
+        connectionLog.record("page renderer gone (crashed=$crashed)")
     }
 
     fun onCameraPermissionGranted() {
@@ -298,12 +321,14 @@ class KioskViewModel @Inject constructor(
                 // (onResume), e recarregar ali joga fora a pagina a cada volta de tela.
                 val wasOnline = _isOnline.value
                 _isOnline.value = true
+                connectionLog.record("network available")
                 if (!wasOnline && _needsRefresh.value.not()) {
                     _needsRefresh.value = true
                 }
             }
 
             override fun onLost(network: Network) {
+                connectionLog.record("network lost")
                 _isOnline.value = false
             }
         }

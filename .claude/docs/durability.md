@@ -1,10 +1,10 @@
 ---
-generated: 2026-10-27
-generated-commit: 9130597
+generated: 2026-11-20
+generated-commit: 86a29f4
 project: open-kiosk
-scope: [app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/AndroidManifest.xml, app/build.gradle.kts, app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt, app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt, app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt, app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt]
+scope: [app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/AndroidManifest.xml, app/build.gradle.kts, app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt, app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt, app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt, app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt, app/src/main/java/com/openkiosk/diagnostics/ConnectionLog.kt, app/src/main/java/com/openkiosk/di/DiagnosticsModule.kt]
 verified-by: "adb shell run-as com.openkiosk ls -l files/../databases/ e .../shared_prefs/ no tablet; grep -rn \"getSharedPreferences|Room.databaseBuilder|allowBackup\" app/src/main; ./gradlew test"
-doc-sig: open-kiosk/ConfigRepository.kt@gen=3.8#81899c8f
+doc-sig: open-kiosk/ConfigRepository.kt@gen=3.8#24527eb2
 ---
 
 # Durabilidade — onde o estado mora e o que acontece se o tablet sumir
@@ -114,6 +114,19 @@ app/src/main/java/com/openkiosk/presentation/component/KioskWebView.kt
 - O WebView guarda dados do site no diretório privado do pacote — [inferido], não inspecionado no aparelho.
 - Não há `CookieManager` configurado no código (`grep -rn "CookieManager" app/src/main/java` → vazio), ou seja, o comportamento é o padrão da plataforma — [confirmado].
 - Linha de durabilidade: **sem cópia. Frequência: nenhuma. Nunca restaurado.** Se o painel exibir uma página que guarda sessão/estado local, isso se perde na troca de tablet.
+
+---
+
+## 3b. Registro de conexão `connection-log.txt` (diagnóstico)
+
+- Onde: `filesDir/connection-log.txt` + cópia `.1`, teto de 256 KB cada (**DiagnosticsModule.kt**,
+  **ConnectionLog.kt**) — [confirmado].
+- É diagnóstico descartável: perder o arquivo não afeta o funcionamento do quiosque, só apaga o
+  histórico de quedas.
+- Linha de durabilidade: **sem cópia. Frequência: nenhuma. Nunca restaurado.** A rotação própria
+  descarta o mais antigo por tamanho. Para guardar um trecho, copie pelo cabo:
+  `adb shell dumpsys activity service com.openkiosk/.service.KioskWatchdogService > log.txt`
+  [confirmado no aparelho em 2026-11-20].
 
 ---
 

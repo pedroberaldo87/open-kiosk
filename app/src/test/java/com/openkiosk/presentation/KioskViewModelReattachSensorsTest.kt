@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkRequest
 import androidx.lifecycle.LifecycleOwner
 import com.openkiosk.data.repository.ConfigRepository
+import com.openkiosk.diagnostics.ConnectionLog
 import com.openkiosk.domain.PlaylistManager
 import com.openkiosk.domain.model.KioskConfig
 import com.openkiosk.domain.model.PlaylistItem
@@ -73,7 +74,8 @@ class KioskViewModelReattachSensorsTest {
             motionDetectionManager,
             sensorWakeManager,
             powerStateMonitor,
-            playlistManager
+            playlistManager,
+            mock<ConnectionLog>()
         )
 
         val activity = mock<Activity>()

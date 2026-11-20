@@ -13,6 +13,8 @@
     <string name="section_kiosk">KIOSK</string>
     <string name="section_language">IDIOMA</string>
     <string name="section_about">SOBRE</string>
+    <string name="section_connection_log">REGISTRO DE CONEXÃO</string>
+    <string name="connection_log_empty">Nenhum evento registrado ainda</string>
 
     <!-- Settings: Auto-refresh -->
     <string name="auto_refresh_disabled">Desativado</string>
