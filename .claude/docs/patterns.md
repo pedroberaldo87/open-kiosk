@@ -1,6 +1,6 @@
 ---
 generated: 2026-11-20
-generated-commit: 1a6c0d1
+generated-commit: 86a29f4
 project: open-kiosk
 scope: [app/src/main/java/com/openkiosk/sleep/ScreenStateManager.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionAnalyzer.kt, app/src/main/java/com/openkiosk/sensors/MotionDetectionManager.kt, app/src/main/java/com/openkiosk/sensors/SensorWakeManager.kt, app/src/main/java/com/openkiosk/webview/WebViewRecoveryManager.kt, app/src/main/java/com/openkiosk/presentation/component/KioskWebView.kt, app/src/main/java/com/openkiosk/presentation/component/PinDialog.kt, app/src/test/java/com/openkiosk/presentation/KioskViewModelSensorOffTest.kt, app/src/test/java/com/openkiosk/sensors/MotionDetectionAnalyzerLightTest.kt, app/src/test/java/com/openkiosk/service/WatchdogBackoffTest.kt, app/src/test/java/com/openkiosk/service/GraphicsRestartTest.kt, app/src/test/java/com/openkiosk/service/LockscreenAdTest.kt, app/src/main/java/com/openkiosk/webview/MainFrameLoad.kt, app/src/test/java/com/openkiosk/webview/MainFrameLoadTest.kt, app/src/test/java/com/openkiosk/presentation/KioskViewModelRetryOnResumeTest.kt, app/src/test/java/com/openkiosk/diagnostics/ConnectionLogTest.kt]
 verified-by: "./gradlew testDebugUnitTest (resultados em app/build/test-results/testDebugUnitTest/*.xml); no aparelho: adb logcat -s MotionDetection:D ScreenState:D KioskWebView:E para ler changeRatio, transicoes de estado e morte do renderer"
