@@ -22,6 +22,8 @@ scope:
   - app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt
   - app/src/main/java/com/openkiosk/presentation/viewmodel/SettingsViewModel.kt
   - app/src/main/AndroidManifest.xml
+  - app/src/main/java/com/openkiosk/webview/MainFrameLoad.kt
+  - app/src/main/java/com/openkiosk/diagnostics/ConnectionLog.kt
 verified-by: |
   Testes de unidade: ./gradlew :app:testDebugUnitTest
   (14 arquivos de teste — `ls app/src/test/java/com/openkiosk/*/*.kt | wc -l` → 14)

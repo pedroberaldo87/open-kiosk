@@ -2,7 +2,7 @@
 generated: 2026-08-15
 generated-commit: 628b8ea
 project: open-kiosk
-scope: [app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt, app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt, app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt, app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt]
+scope: [app/src/main/java/com/openkiosk/data/repository/PlaylistRepository.kt, app/src/main/java/com/openkiosk/data/local/dao/PlaylistDao.kt, app/src/main/java/com/openkiosk/data/local/dao/ConfigDao.kt, app/src/main/java/com/openkiosk/di/DatabaseModule.kt, app/src/main/java/com/openkiosk/data/repository/ConfigRepository.kt, app/src/main/java/com/openkiosk/data/local/AppDatabase.kt, app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt, app/src/main/java/com/openkiosk/data/local/entity/PlaylistEntity.kt, app/src/main/java/com/openkiosk/data/local/entity/ConfigEntity.kt, app/src/main/java/com/openkiosk/domain/model/KioskConfig.kt, app/src/main/java/com/openkiosk/diagnostics/ConnectionLog.kt, app/src/main/java/com/openkiosk/di/DiagnosticsModule.kt]
 verified-by: |
   Com o tablet ligado no cabo:
     adb shell run-as com.openkiosk ls -la databases shared_prefs
@@ -18,17 +18,19 @@ doc-sig: open-kiosk/PlaylistRepository.kt@gen=3.8#15780373
 
 # Depositos de dados — inventario
 
-Tudo que sobrevive a fechar o aplicativo cabe em **tres** lugares. A lista abaixo saiu de uma
+Tudo que sobrevive a fechar o aplicativo cabe em **quatro** lugares. A lista abaixo saiu de uma
 varredura mecanica, nao de leitura a olho:
 
 ```
-grep -rn "getSharedPreferences\|DataStore\|openFileOutput\|filesDir\|cacheDir" --include="*.kt" app/src
-# unica ocorrencia: app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt:18
+grep -rn "getSharedPreferences\|DataStore\|openFileOutput\|filesDir\|cacheDir" --include="*.kt" app/src/main
+app/src/main/java/com/openkiosk/di/DiagnosticsModule.kt:22:        ConnectionLog(File(context.filesDir, "connection-log.txt"))
+app/src/main/java/com/openkiosk/data/local/KioskPrefs.kt:28:        context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 ```
 
 - Um banco SQLite gerido pelo Room (`openkiosk.db`) — a configuracao e a lista de enderecos.
 - Um arquivo de preferencias do Android (`open_kiosk_prefs`) — o estado da tela e o idioma.
 - O armazenamento interno do proprio navegador embutido (DOM storage) — o que o site guarda.
+- Um arquivo de texto (`connection-log.txt`) — o registro de quedas e voltas da pagina e da rede.
 
 Nao existe banco remoto, nem servidor, nem sincronizacao. Nada sai do tablet. [confirmado]
 
@@ -266,12 +268,34 @@ object KioskPrefs {
 
 ---
 
+## 4. Registro de conexao — `connection-log.txt`
+
+- Caminho: `filesDir/connection-log.txt` (**DiagnosticsModule.kt** :: `provideConnectionLog`), mais
+  uma copia anterior `connection-log.txt.1`. [confirmado]
+- Formato: uma linha por evento, `yyyy-MM-dd HH:mm:ss  <evento>`, anexada por
+  **ConnectionLog.kt** :: `record`. Passando de `MAX_BYTES` (256 KB) o atual vira `.1` e o `.1`
+  antigo e apagado — o teto e de dois arquivos. [confirmado; **ConnectionLogTest.kt**]
+- Quem escreve: **KioskViewModel.kt** (erro e sucesso de pagina, nova tentativa, rede perdida e
+  disponivel, app na frente e pausado, renderizador morto) e **KioskWatchdogService.kt** (reinicio
+  do processo por memoria de video). [confirmado]
+- Quem le: **SettingsViewModel.kt** :: `recentConnectionEvents` (as 30 mais recentes, para a gaveta,
+  relidas quando `ConnectionLog.version` muda) e **KioskWatchdogService.kt** :: `dump` (tudo, pelo
+  cabo: `adb shell dumpsys activity service com.openkiosk/.service.KioskWatchdogService`). [confirmado
+  no aparelho em 2026-11-20]
+- Por que arquivo e nao logcat: o logcat do Fire guarda ~2 min e o app de producao nao e depuravel.
+  Por que pasta interna: `adb pull` de `/sdcard/Android/data/com.openkiosk` da "Permission denied"
+  no Fire. [confirmado]
+- Falha de disco nao derruba o quiosque: `record` e `recent` engolem `IOException` com `Log.w`. [confirmado]
+
+---
+
 ## O que NAO persiste
 
 - Backup do Android desligado: `android:allowBackup="false"` em **app/src/main/AndroidManifest.xml**.
   Isso significa que **nem o banco nem as preferencias entram no backup do sistema** — trocar de
   tablet nao traz nada junto. [confirmado]
-- Sem `DataStore`, sem arquivo proprio em `filesDir`/`cacheDir`, sem escrita em
+- Sem `DataStore`, sem arquivo proprio em `cacheDir`, sem arquivo em `filesDir` alem do registro de
+  conexao (secao 4), sem escrita em
   `Settings.System`/`Global`/`Secure` a partir do codigo Kotlin — todos os greps voltaram vazios. [confirmado]
 - Os ajustes de provisionamento feitos pelo cabo (`stay_on_while_plugged_in`, `locksettings`,
   `cmd package set-home-activity`, `appops SYSTEM_ALERT_WINDOW`) vivem no ANDROID, nunca no banco do
